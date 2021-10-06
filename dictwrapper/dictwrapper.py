@@ -1,7 +1,7 @@
 from .classwrapper import ClassWrapper
 from .visitor import MakeDictWrapperVisitor
 from .dictwrapperaccess import DictWrapperAccess
-from collections import Iterable, MutableMapping
+from collections.abc import Iterable, MutableMapping
 import inspect
 
 class DictWrapper(ClassWrapper):
