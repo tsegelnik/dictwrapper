@@ -1,3 +1,4 @@
+from .classwrapper import ClassWrapper
 import inspect
 
 class ClassWrapperAuto(ClassWrapper):
