@@ -1,3 +1,5 @@
+import inspect
+
 class DictWrapperVisitor(object):
     def start(self, dct):
         pass

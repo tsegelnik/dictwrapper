@@ -12,7 +12,7 @@ class DictWrapper(ClassWrapper):
           'key1.key2.key3' will be treated as a nested key if '.' is set for the split symbol
         - self._ may be used to access nested dictionaries via attributes: dw.key1.key2.key3
     """
-    _split = None
+    _split: str = None
     _parent = None
     _type = dict
     def __new__(cls, dic, *args, **kwargs):
@@ -20,7 +20,7 @@ class DictWrapper(ClassWrapper):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic, split=None, parent=None, *args, **kwargs):
+    def __init__(self, dic, split:str=None, parent=None, *args, **kwargs):
         if isinstance(dic, DictWrapper):
             if split is None:
                 split = dic._split
@@ -32,12 +32,6 @@ class DictWrapper(ClassWrapper):
             self._parent = parent
             self._split = parent._split
             self._types = parent._types
-
-    def __eq__(self, other):
-        if isinstance(other, DictWrapper):
-            return self._obj==other._obj
-
-        return self._obj==other
 
     @property
     def _(self):
@@ -51,7 +45,7 @@ class DictWrapper(ClassWrapper):
             ret = self[key]
         except KeyError:
             ret = self[key]=self._type()
-            return self._wrapobject(ret)
+            return self._wrap(ret)
 
         if not isinstance(ret, self._wrapper_class):
             raise KeyError('Child {!s} is not DictWrapper'.format(key))
@@ -88,9 +82,9 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            return self.__getattr__('get')(key, *args, **kwargs)
+            return self._wrap(self._obj.get(key, *args, **kwargs))
 
-        sub = self.__getattr__('get')(key)
+        sub = self._wrap(self._obj.get(key))
         if sub is None:
             if args:
                 return args[0]
@@ -102,7 +96,7 @@ class DictWrapper(ClassWrapper):
             return self
         key, rest=self.splitkey(key)
 
-        sub = self.__getattr__('__getitem__')(key)
+        sub = self._wrap(self._obj.__getitem__(key))
         if not rest:
             return sub
 
@@ -116,7 +110,7 @@ class DictWrapper(ClassWrapper):
             raise Exception('May not delete itself')
         key, rest=self.splitkey(key)
 
-        sub = self.__getattr__('__getitem__')(key)
+        sub = self._wrap(self._obj.__getitem__(key))
         if not rest:
             del self._obj[key]
             return
@@ -128,13 +122,13 @@ class DictWrapper(ClassWrapper):
 
         if not rest:
             ret=self._obj.setdefault(key, value)
-            return self._wrapobject(ret)
+            return self._wrap(ret)
 
         if key in self:
-            sub = self.__getattr__('get')(key)
+            sub = self._wrap(self._obj.get(key))
         else:
             sub = self._obj[key] = self._type()
-            sub = self._wrapobject(sub)
+            sub = self._wrap(sub)
             # # cfg._set_parent( self )
 
         return sub.setdefault(rest, value)
@@ -147,10 +141,10 @@ class DictWrapper(ClassWrapper):
             return value
 
         if key in self:
-            sub = self.__getattr__('get')(key)
+            sub = self._wrap(self._obj.get(key))
         else:
             sub = self._obj[key] = self._type()
-            sub = self._wrapobject(sub)
+            sub = self._wrap(sub)
             # # cfg._set_parent( self )
 
         return sub.set(rest, value)
@@ -166,14 +160,14 @@ class DictWrapper(ClassWrapper):
             return False
 
         if rest:
-            sub = self.__getattr__('get')(key)
+            sub = self._wrap(self._obj.get(key))
             return rest in sub
 
         return True
 
     def items(self):
         for k, v in self._obj.items():
-            yield k, self._wrapobject(v)
+            yield k, self._wrap(v)
 
     def deepcopy(self):
         new = DictWrapper(self._type())

@@ -1,12 +1,5 @@
-import inspect
-
 class ClassWrapper(object):
-    """Wrap any class and forward
-        - getitem/setitem
-        - getattr
-        - call
-        calls, wrap the result if the class is of the same type"""
-    def __init__(self, obj, parent=None, types=None):
+    def __init__(self, obj, *, parent=None, types=None):
         self._obj = obj
         if types:
             self._types = types
@@ -32,49 +25,21 @@ class ClassWrapper(object):
     def __bool__(self):
         return bool(self._obj)
 
-    def __iter__(self):
-        return iter(self._obj)
-
     def __contains__(self, v):
         return v in self._obj
 
-    def __getattr__(self, attr):
-        method = getattr(self._obj, attr)
-        return self._wrap(method)
+    def __eq__(self, other):
+        if isinstance(other, ClassWrapper):
+            return self._obj==other._obj
 
-    def __getitem__(self, k):
-        return self._wrap(self._obj[k])
-
-    def __call__(self, *args, **kwargs):
-        return self._wrap(self._obj(*args, **kwargs))
-
-    def __setitem__(self, k, v):
-        self._obj[k]=v
+        return self._obj==other
 
     def _wrap(self, obj):
         if isinstance(obj, ClassWrapper):
             return obj
-        if inspect.isgenerator(obj) or inspect.isgeneratorfunction(obj):
-            return self._wrapgenerator(obj)
-        if inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj):
-            return self._wrapmethod(obj)
 
-        return self._wrapobject(obj)
-
-    def _wrapobject(self, obj):
         if isinstance(obj, self._types):
             return self._wrapper_class(obj, parent=self)
 
         return obj
 
-    def _wrapmethod(self, method):
-        def wrapped_method(*args, **kwargs):
-            return self._wrap(method(*args, **kwargs))
-        return wrapped_method
-
-    def _wrapgenerator(self, generator):
-        def wrapped(*args, **kwargs):
-            for i in generator(*args, **kwargs):
-                yield self._wrap(i)
-
-        return wrapped
