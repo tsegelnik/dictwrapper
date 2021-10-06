@@ -25,12 +25,12 @@ def test_dictwrapper_03():
 
     assert tuple(dw.keys())==('a','b','c')
 
-@pytest.mark.parametrize('split', [None, '.'])
-def test_dictwrapper_03(split):
+@pytest.mark.parametrize('sep', [None, '.'])
+def test_dictwrapper_03(sep):
     dct = dict(a=1, b=2, c=3, d=dict(e=4), f=dict(g=dict(h=5)))
     dct['z.z.z'] = 0
     print(dct)
-    dw = DictWrapper(dct, split=split)
+    dw = DictWrapper(dct, sep=sep)
 
     #
     # Test self access
@@ -74,14 +74,14 @@ def test_dictwrapper_03(split):
         pass
 
     #
-    # Test get split
+    # Test get sep
     #
-    if split:
+    if sep:
         assert dw.get('d.e')==4
     else:
         assert dw.get('d.e') is None
 
-    if split:
+    if sep:
         try:
             dw.get('z.z.z')
             assert False
@@ -91,22 +91,22 @@ def test_dictwrapper_03(split):
         assert dw.get('z.z.z')==0
 
     #
-    # Test getitem split
+    # Test getitem sep
     #
     try:
         assert dw['d.e']==4
-        assert split is not None
+        assert sep is not None
     except KeyError:
         pass
 
     try:
         assert dw['f.g.h']==5
         assert dw[('f.g', 'h')]==5
-        assert split is not None
+        assert sep is not None
     except KeyError:
         pass
 
-    if split:
+    if sep:
         try:
             dw['z.z.z']
             assert False
@@ -128,8 +128,8 @@ def test_dictwrapper_03(split):
     assert ('d', 'e') in dw
     assert not ('k', 'e') in dw
     assert ('f', 'g', 'h') in dw
-    assert ('f.g.h' in dw) == bool(split)
-    assert ('z.z.z' in dw) == bool(not split)
+    assert ('f.g.h' in dw) == bool(sep)
+    assert ('z.z.z' in dw) == bool(not sep)
 
     #
     # Test parents
@@ -156,7 +156,7 @@ def test_dictwrapper_03(split):
 
     dw[('o.l.m.n')] = 6
     assert dw['o.l.m.n'] == 6
-    if not split:
+    if not sep:
         assert dw.unwrap()['o.l.m.n'] == 6
 
     #
@@ -183,7 +183,7 @@ def test_dictwrapper_06_inheritance():
         def depth(self):
             return max([len(k) for k in self.walkkeys()])
 
-    dw = DictWrapperA(dct, split='.')
+    dw = DictWrapperA(dct, sep='.')
     assert dw.count()==7
     assert dw['d'].count()==1
     assert dw['f'].count()==2
@@ -215,7 +215,7 @@ def test_dictwrapper_07_delete():
 def test_dictwrapper_08_create():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
-    dw = DictWrapper(dct, split='.')
+    dw = DictWrapper(dct, sep='.')
 
     dw._('i.k').l=3
     assert dw._.i.k.l==3
@@ -226,7 +226,7 @@ def test_dictwrapper_08_create():
 def test_dictwrapper_09_dictcopy():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z'] = {}
-    dw = DictWrapper(dct, split='.')
+    dw = DictWrapper(dct, sep='.')
 
     dw1 = dw.deepcopy()
     for i, (k, v) in enumerate(dw1.walkdicts()):
@@ -240,7 +240,7 @@ def test_dictwrapper_09_dictcopy():
 def test_dictwrapper_09_walkitems():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('c1', dict(i=dict(j=dict(k=dict(l=6))))), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z'] = {}
-    dw = DictWrapper(dct, split='.')
+    dw = DictWrapper(dct, sep='.')
 
     imaxlist=[5, 0, 6, 5, 5, 5, 5, 5, 5]
     for imax, maxdepth in zip(imaxlist, [None]+list(range(9))):
@@ -277,7 +277,7 @@ def test_dictwrapper_10_iterkey():
 
 def test_dictwrapper_11_iterkey():
     d = dict(a=1, b=2, c=3)
-    dw = DictWrapper(d,  split='.')
+    dw = DictWrapper(d,  sep='.')
 
     assert ['a']==list(dw.iterkey('a'))
     assert ['a', 'b']==list(dw.iterkey('a.b'))

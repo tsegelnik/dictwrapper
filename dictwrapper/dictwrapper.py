@@ -8,11 +8,11 @@ class DictWrapper(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
         The following functionality is implemented:
         - Tuple keys are treated to access nested dictionaries ('key1', 'key2', 'key3')
-        - Optionally split symbol may be set to automatically split string keys into tuple keys:
-          'key1.key2.key3' will be treated as a nested key if '.' is set for the split symbol
+        - Optionally sep symbol may be set to automatically split string keys into tuple keys:
+          'key1.key2.key3' will be treated as a nested key if '.' is set for the sep symbol
         - self._ may be used to access nested dictionaries via attributes: dw.key1.key2.key3
     """
-    _split: str = None
+    _sep: str = None
     _parent = None
     _type = dict
     def __new__(cls, dic, *args, **kwargs):
@@ -20,17 +20,20 @@ class DictWrapper(ClassWrapper):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic, split:str=None, parent=None, *args, **kwargs):
+    def __init__(self, dic, *, sep:str=None, parent=None):
         if isinstance(dic, DictWrapper):
-            if split is None:
-                split = dic._split
+            if sep is None:
+                sep = dic._sep
             dic = dic._obj
-        self._split = split
+        self._sep = sep
         self._type = type(dic)
         ClassWrapper.__init__(self, dic, types=MutableMapping)
         if parent:
+            if sep and sep!=parent._sep:
+                raise ValueError(f'Inconsistent separators: {sep} (self) and {parent._sep} (parent)')
+
             self._parent = parent
-            self._split = parent._split
+            self._sep = parent._sep
             self._types = parent._types
 
     @property
@@ -57,8 +60,8 @@ class DictWrapper(ClassWrapper):
 
     def iterkey(self, key):
         if isinstance(key, str):
-            if self._split:
-                for s in key.split(self._split):
+            if self._sep:
+                for s in key.split(self._sep):
                     yield s
             else:
                 yield key
@@ -107,7 +110,7 @@ class DictWrapper(ClassWrapper):
 
     def __delitem__(self, key):
         if key==():
-            raise Exception('May not delete itself')
+            raise ValueError('May not delete itself')
         key, rest=self.splitkey(key)
 
         sub = self._wrap(self._obj.__getitem__(key))
@@ -178,7 +181,7 @@ class DictWrapper(ClassWrapper):
             else:
                 new[k] = v
 
-        new._split = self._split
+        new._sep = self._sep
 
         return new
 

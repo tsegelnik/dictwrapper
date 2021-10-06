@@ -1,5 +1,3 @@
-import inspect
-
 class DictWrapperVisitor(object):
     def start(self, dct):
         pass
@@ -20,8 +18,8 @@ def MakeDictWrapperVisitor(fcn):
     if isinstance(fcn, DictWrapperVisitor):
         return fcn
 
-    if not inspect.isfunction(fcn) and not hasattr(fcn, '__call__'):
-        raise Exception('Expect function, got '+type(fcn).__name__)
+    if not callable(fcn):
+        raise TypeError('Expect function, got '+type(fcn).__name__)
 
     ret=DictWrapperVisitor()
     ret.visit = fcn
