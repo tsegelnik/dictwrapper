@@ -168,9 +168,16 @@ class DictWrapper(ClassWrapper):
 
         return True
 
+    def keys(self):
+        return self._obj.keys()
+
     def items(self):
         for k, v in self._obj.items():
             yield k, self._wrap(v)
+
+    def values(self):
+        for v in self._obj.values():
+            yield self._wrap(v)
 
     def deepcopy(self):
         new = DictWrapper(self._type())
