@@ -15,7 +15,7 @@ class DictWrapper(ClassWrapper):
     _parent = None
     _type = dict
     def __new__(cls, dic, *args, parent=None, sep=None):
-        if not isinstance(dic, (MutableMapping, DictWrapper)):
+        if not isinstance(dic, (dict, DictWrapper)):
             return dic
         return ClassWrapper.__new__(cls)
 
