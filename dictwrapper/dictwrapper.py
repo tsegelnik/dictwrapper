@@ -13,9 +13,9 @@ class DictWrapper(ClassWrapper):
     """
     _sep: str = None
     _parent = None
-    _type = dict
+    _types = dict
     def __new__(cls, dic, *args, parent=None, sep=None):
-        if not isinstance(dic, (dict, DictWrapper)):
+        if not isinstance(dic, (MutableMapping, DictWrapper)):
             return dic
         return ClassWrapper.__new__(cls)
 
@@ -25,8 +25,7 @@ class DictWrapper(ClassWrapper):
                 sep = dic._sep
             dic = dic._obj
         self._sep = sep
-        self._type = type(dic)
-        ClassWrapper.__init__(self, dic, types=MutableMapping)
+        super().__init__(dic, types=type(dic))
         if parent:
             if sep and sep!=parent._sep:
                 raise ValueError(f'Inconsistent separators: {sep} (self) and {parent._sep} (parent)')
@@ -46,7 +45,7 @@ class DictWrapper(ClassWrapper):
         try:
             ret = self[key]
         except KeyError:
-            ret = self[key]=self._type()
+            ret = self[key]=self._types()
             return self._wrap(ret)
 
         if not isinstance(ret, self._wrapper_class):
@@ -127,7 +126,7 @@ class DictWrapper(ClassWrapper):
         if key in self:
             sub = self._wrap(self._obj.get(key))
         else:
-            sub = self._obj[key] = self._type()
+            sub = self._obj[key] = self._types()
             sub = self._wrap(sub)
             # # cfg._set_parent( self )
 
@@ -143,7 +142,7 @@ class DictWrapper(ClassWrapper):
         if key in self:
             sub = self._wrap(self._obj.get(key))
         else:
-            sub = self._obj[key] = self._type()
+            sub = self._obj[key] = self._types()
             sub = self._wrap(sub)
             # # cfg._set_parent( self )
 
@@ -177,7 +176,7 @@ class DictWrapper(ClassWrapper):
             yield self._wrap(v)
 
     def deepcopy(self):
-        new = DictWrapper(self._type())
+        new = DictWrapper(self._types(), parent=self._parent, sep=self._sep)
         for k, v in self.items():
             k = k,
             if isinstance(v, self._wrapper_class):
