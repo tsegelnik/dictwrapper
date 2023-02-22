@@ -3,17 +3,17 @@ import inspect
 
 class ClassWrapperAuto(ClassWrapper):
     # def __iter__(self):
-        # return iter(self._obj)
+        # return iter(self._object)
 
     def __getattr__(self, attr):
-        method = getattr(self._obj, attr)
+        method = getattr(self._object, attr)
         return self._wrap(method)
 
     def __getitem__(self, k):
-        return self._wrap(self._obj[k])
+        return self._wrap(self._object[k])
 
     def __call__(self, *args, **kwargs):
-        return self._wrap(self._obj(*args, **kwargs))
+        return self._wrap(self._object(*args, **kwargs))
 
     def _wrap(self, obj):
         if isinstance(obj, ClassWrapper):
