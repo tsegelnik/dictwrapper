@@ -1,7 +1,9 @@
 from .classwrapper import ClassWrapper
 from .visitor import MakeDictWrapperVisitor
 from .dictwrapperaccess import DictWrapperAccess
+
 from collections.abc import Sequence, MutableMapping
+from typing import Any
 
 class DictWrapper(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
@@ -12,20 +14,24 @@ class DictWrapper(ClassWrapper):
         - self._ may be used to access nested dictionaries via attributes: dw.key1.key2.key3
     """
     _sep: str = None
-    _parent = None
-    _types = dict
-    def __new__(cls, dic, *args, parent=None, sep=None):
+    _parent: Any = None
+    _types: Any = dict
+    _not_recursive_to_others: bool = True
+    def __new__(cls, dic, *args, parent=None, sep=None, recursive_to_others=None):
         if not isinstance(dic, (MutableMapping, DictWrapper)):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic, *, sep:str=None, parent=None):
+    def __init__(self, dic, *, sep: str=None, parent=None, recursive_to_others: bool=False):
         if isinstance(dic, DictWrapper):
             if sep is None:
                 sep = dic._sep
-            dic = dic._obj
-        self._sep = sep
+            recursive_to_others = not dic._not_recursive_to_others
+            dic = dic._object
         super().__init__(dic, types=type(dic))
+
+        self._sep = sep
+        self._not_recursive_to_others = not recursive_to_others
         if parent:
             if sep and sep!=parent._sep:
                 raise ValueError(f'Inconsistent separators: {sep} (self) and {parent._sep} (parent)')
@@ -33,6 +39,7 @@ class DictWrapper(ClassWrapper):
             self._parent = parent
             self._sep = parent._sep
             self._types = parent._types
+            self._not_recursive_to_others = parent._not_recursive_to_others
 
     @property
     def _(self):
@@ -54,7 +61,7 @@ class DictWrapper(ClassWrapper):
         return ret
 
     def keys(self):
-        return self._obj.keys()
+        return self._object.keys()
 
     def iterkey(self, key):
         if isinstance(key, str):
@@ -81,13 +88,17 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            return self._wrap(self._obj.get(key, *args, **kwargs))
+            return self._wrap(self._object.get(key, *args, **kwargs))
 
-        sub = self._wrap(self._obj.get(key))
+        sub = self._wrap(self._object.get(key))
         if sub is None:
             if args:
                 return args[0]
-            raise KeyError( "No nested key '%s'"%key )
+            raise KeyError(f"No nested key '{key}'")
+
+        if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
+            raise TypeError(f"Nested value for '{key}' has wrong type")
+
         return sub.get(rest, *args, **kwargs)
 
     def __getitem__(self, key):
@@ -95,12 +106,15 @@ class DictWrapper(ClassWrapper):
             return self
         key, rest=self.splitkey(key)
 
-        sub = self._wrap(self._obj.__getitem__(key))
+        sub = self._wrap(self._object.__getitem__(key))
         if not rest:
             return sub
 
         if sub is None:
-            raise KeyError( "No nested key '%s'"%key )
+            raise KeyError( f"No nested key '{key}'" )
+
+        if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
+            raise TypeError(f"Nested value for '{key}' has wrong type")
 
         return sub[rest]
 
@@ -109,10 +123,13 @@ class DictWrapper(ClassWrapper):
             raise ValueError('May not delete itself')
         key, rest=self.splitkey(key)
 
-        sub = self._wrap(self._obj.__getitem__(key))
+        sub = self._wrap(self._object.__getitem__(key))
         if not rest:
-            del self._obj[key]
+            del self._object[key]
             return
+
+        if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
+            raise TypeError(f"Nested value for '{key}' has wrong type")
 
         del sub[rest]
 
@@ -120,15 +137,18 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            ret=self._obj.setdefault(key, value)
+            ret=self._object.setdefault(key, value)
             return self._wrap(ret)
 
         if key in self:
-            sub = self._wrap(self._obj.get(key))
+            sub = self._wrap(self._object.get(key))
         else:
-            sub = self._obj[key] = self._types()
+            sub = self._object[key] = self._types()
             sub = self._wrap(sub)
             # # cfg._set_parent( self )
+
+        if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
+            raise TypeError(f"Nested value for '{key}' has wrong type")
 
         return sub.setdefault(rest, value)
 
@@ -136,15 +156,18 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            self._obj[key] = value
+            self._object[key] = value
             return value
 
         if key in self:
-            sub = self._wrap(self._obj.get(key))
+            sub = self._wrap(self._object.get(key))
         else:
-            sub = self._obj[key] = self._types()
+            sub = self._object[key] = self._types()
             sub = self._wrap(sub)
             # # cfg._set_parent( self )
+
+        if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
+            raise TypeError(f"Nested value for '{key}' has wrong type")
 
         return sub.set(rest, value)
 
@@ -155,32 +178,36 @@ class DictWrapper(ClassWrapper):
             return True
         key, rest=self.splitkey(key)
 
-        if not key in self._obj:
+        if not key in self._object:
             return False
 
         if rest:
-            sub = self._wrap(self._obj.get(key))
+            sub = self._wrap(self._object.get(key))
+
+            if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
+                raise TypeError(f"Nested value for '{key}' has wrong type")
+
             return rest in sub
 
         return True
 
     def keys(self):
-        return self._obj.keys()
+        return self._object.keys()
 
     def items(self):
-        for k, v in self._obj.items():
+        for k, v in self._object.items():
             yield k, self._wrap(v)
 
     def values(self):
-        for v in self._obj.values():
+        for v in self._object.values():
             yield self._wrap(v)
 
     def deepcopy(self):
-        new = DictWrapper(self._types(), parent=self._parent, sep=self._sep)
+        new = DictWrapper(self._types(), parent=self._parent, sep=self._sep, recursive_to_others=not self._not_recursive_to_others)
         for k, v in self.items():
             k = k,
             if isinstance(v, self._wrapper_class):
-                new[k] = v.deepcopy()._obj
+                new[k] = v.deepcopy()._object
             else:
                 new[k] = v
 

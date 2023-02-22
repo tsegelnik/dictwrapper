@@ -19,21 +19,35 @@ def test_dictwrapper_storage():
         },
         'key0': 'value0'
     }}
-    dw = DictWrapper(dct)
-    dws = DictWrapper(dct, sep='.')
+    dw = DictWrapper(dct, recursive_to_others=True)
+    dws = DictWrapper(dct, sep='.', recursive_to_others=True)
+    dwerror = DictWrapper(dct, recursive_to_others=False)
 
-    st1 = dw['root', 'subfolder2', 'st']
-    assert st1 is storage
-    assert st1['a1', 'b1', 'c1']=='v1'
-    assert st1['b1', 'a1', 'c1']=='v1'
-    assert st1['c1', 'a1', 'b1']=='v1'
+    objects = (dw, dws, dwerror)
+    objectsok = (dw, dws)
 
-    assert dw['root', 'subfolder2', 'st', 'a1', 'b1', 'c1']=='v1'
-    assert dw['root', 'subfolder2', 'st', 'b1', 'a1', 'c1']=='v1'
-    assert dw['root', 'subfolder2', 'st', 'c1', 'a1', 'b1']=='v1'
-    assert dw['root', 'subfolder2', 'st', 'a2', 'b2', 'c2']=='v2'
-    assert dw['root', 'subfolder2', 'st', 'b2', 'a2', 'c2']=='v2'
-    assert dw['root', 'subfolder2', 'st', 'c2', 'a2', 'b2']=='v2'
+    assert storage['a1', 'b1', 'c1']=='v1'
+    assert storage['b1', 'a1', 'c1']=='v1'
+    assert storage['c1', 'a1', 'b1']=='v1'
+
+    for obj in objects:
+        st1 = obj['root', 'subfolder2', 'st']
+        assert st1 is storage
+
+    for obj in objectsok:
+        assert obj['root', 'subfolder2', 'st', 'a1', 'b1', 'c1']=='v1'
+        assert obj['root', 'subfolder2', 'st', 'b1', 'a1', 'c1']=='v1'
+        assert obj['root', 'subfolder2', 'st', 'c1', 'a1', 'b1']=='v1'
+        assert obj['root', 'subfolder2', 'st', 'a2', 'b2', 'c2']=='v2'
+        assert obj['root', 'subfolder2', 'st', 'b2', 'a2', 'c2']=='v2'
+        assert obj['root', 'subfolder2', 'st', 'c2', 'a2', 'b2']=='v2'
+
+        assert ('root', 'subfolder2', 'st', 'a1', 'b1', 'c1') in obj
+        assert ('root', 'subfolder2', 'st', 'b1', 'a1', 'c1') in obj
+        assert ('root', 'subfolder2', 'st', 'c1', 'a1', 'b1') in obj
+        assert ('root', 'subfolder2', 'st', 'a2', 'b2', 'c2') in obj
+        assert ('root', 'subfolder2', 'st', 'b2', 'a2', 'c2') in obj
+        assert ('root', 'subfolder2', 'st', 'c2', 'a2', 'b2') in obj
 
     assert dws['root.subfolder2.st.a1.b1.c1']=='v1'
     assert dws['root.subfolder2.st.b1.a1.c1']=='v1'
@@ -41,13 +55,6 @@ def test_dictwrapper_storage():
     assert dws['root.subfolder2.st.a2.b2.c2']=='v2'
     assert dws['root.subfolder2.st.b2.a2.c2']=='v2'
     assert dws['root.subfolder2.st.c2.a2.b2']=='v2'
-
-    assert ('root', 'subfolder2', 'st', 'a1', 'b1', 'c1') in dw
-    assert ('root', 'subfolder2', 'st', 'b1', 'a1', 'c1') in dw
-    assert ('root', 'subfolder2', 'st', 'c1', 'a1', 'b1') in dw
-    assert ('root', 'subfolder2', 'st', 'a2', 'b2', 'c2') in dw
-    assert ('root', 'subfolder2', 'st', 'b2', 'a2', 'c2') in dw
-    assert ('root', 'subfolder2', 'st', 'c2', 'a2', 'b2') in dw
 
     assert 'root.subfolder2.st.a1.b1.c1' in dws
     assert 'root.subfolder2.st.b1.a1.c1' in dws
@@ -64,3 +71,24 @@ def test_dictwrapper_storage():
 
     with raises(KeyError):
         dws['root.subfolder1.st.a1.b1.c1']
+
+    with raises(TypeError):
+        dwerror['root', 'subfolder2', 'st', 'a1', 'b1', 'c1']
+
+    with raises(TypeError):
+        dwerror.get(('root', 'subfolder2', 'st', 'a1', 'b1', 'c1'))
+
+    with raises(TypeError):
+        dwerror.get(('root', 'subfolder2', 'st', 'a1', 'b1', 'c1'), 'default')
+
+    with raises(TypeError):
+        del dwerror['root', 'subfolder2', 'st', 'a1', 'b1', 'c1']
+
+    with raises(TypeError):
+        dwerror.setdefault(('root', 'subfolder2', 'st', 'a1', 'b1', 'c1'), 'default')
+
+    with raises(TypeError):
+        dwerror.set(('root', 'subfolder2', 'st', 'a1', 'b1', 'c1'), 'default')
+
+    with raises(TypeError):
+        ('root', 'subfolder2', 'st', 'a1', 'b1', 'c1') in dwerror
