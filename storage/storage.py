@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import UserDict
 from typing import Any, Callable, Generator, Optional
 
-
 class Storage(UserDict):
     _protect: bool = False
 

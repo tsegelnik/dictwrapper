@@ -1,8 +1,7 @@
 from .classwrapper import ClassWrapper
 from .visitor import MakeDictWrapperVisitor
 from .dictwrapperaccess import DictWrapperAccess
-from collections.abc import Iterable, MutableMapping
-import inspect
+from collections.abc import Sequence, MutableMapping
 
 class DictWrapper(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
@@ -15,7 +14,7 @@ class DictWrapper(ClassWrapper):
     _sep: str = None
     _parent = None
     _type = dict
-    def __new__(cls, dic, *args, **kwargs):
+    def __new__(cls, dic, *args, parent=None, sep=None):
         if not isinstance(dic, (MutableMapping, DictWrapper)):
             return dic
         return ClassWrapper.__new__(cls)
@@ -61,14 +60,12 @@ class DictWrapper(ClassWrapper):
     def iterkey(self, key):
         if isinstance(key, str):
             if self._sep:
-                for s in key.split(self._sep):
-                    yield s
+                yield from key.split(self._sep)
             else:
                 yield key
-        elif isinstance(key, Iterable):
+        elif isinstance(key, Sequence):
             for sk in key:
-                for ssk in self.iterkey(sk):
-                        yield ssk
+                yield from self.iterkey(sk)
         else:
             yield key
 
@@ -236,11 +233,11 @@ class DictWrapper(ClassWrapper):
             yield (), self
 
     def walkkeys(self, *args, **kwargs):
-        for k, v in self.walkitems(*args, **kwargs):
+        for k, _ in self.walkitems(*args, **kwargs):
             yield k
 
     def walkvalues(self, *args, **kwargs):
-        for k, v in self.walkitems(*args, **kwargs):
+        for _, v in self.walkitems(*args, **kwargs):
             yield v
 
     def visit(self, visitor, parentkey=()):
