@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import UserDict
+from collections.abc import Sequence, Set
 from typing import Any, Callable, Generator, Optional
 
 class Storage(UserDict):
@@ -11,19 +12,20 @@ class Storage(UserDict):
         self._protect = protect
         UserDict.__init__(*args, **kwargs)
 
-    def __getitem__(self, key: Any) -> Any:
+    def _process_key(self, key: Any) -> frozenset:
         if isinstance(key, frozenset):
-            return super().__getitem__(key)
-        if not isinstance(key, tuple):
-            key = (key,)
-        key = frozenset(key)
+            return key
+        elif isinstance(key, (Sequence, Set)):
+            return frozenset(key)
+        else:
+            return frozenset((key,))
+
+    def __getitem__(self, key: Any) -> Any:
+        key = self._process_key(key)
         return super().__getitem__(key)
 
     def __setitem__(self, key: Any, val: Any) -> None:
-        if not isinstance(key, frozenset):
-            if not isinstance(key, tuple):
-                key = (key,)
-            key = frozenset(key)
+        key = self._process_key(key)
         if self._protect and key in self:
             raise AttributeError(
                 f"Reassigning of the existed key '{key}' is restricted, "
