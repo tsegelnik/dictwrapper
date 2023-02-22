@@ -8,4 +8,4 @@
 -->
 
 * `DictWrapper` is a tool to work with nested dictionaries
-* `Storage` is a map-like class supporing list as a key
+* `Storage` is a map-like class supporing list/set as a key and does not distinguish the order of the keys
