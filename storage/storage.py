@@ -33,6 +33,10 @@ class Storage(UserDict):
             )
         super().__setitem__(key, val)
 
+    def __contains__(self, key: Any) -> bool:
+        key = self._process_key(key)
+        return super().__contains__(key)
+
     def values(self, *, keys: tuple = (), **kwargs) -> Generator:
         for _, val in self.items(*keys, **kwargs):
             yield val
