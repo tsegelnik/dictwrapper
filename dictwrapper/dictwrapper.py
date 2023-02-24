@@ -240,20 +240,18 @@ class DictWrapper(ClassWrapper):
             k0 = ()
 
         for k, v in v0.items():
-            k = k,
+            k = k0+(k,)
             if isinstance(v, self._wrapper_class):
                 for k1, v1 in v.walkitems(maxdepth=nextdepth):
-                    yield k0+k+k1, v1
+                    yield k+k1, v1
             elif not self._not_recursive_to_others and isinstance(v, MutableMapping):
                 for k1, v1 in v.items():
                     if isinstance(k1, tuple):
-                        yield k0+k+k1, v1
-                    elif isinstance(k1, frozenset):
-                        yield k0+k+tuple(sorted(k1)), v1
+                        yield k+k1, v1
                     else:
-                        yield k0+k+(k1,), v1
+                        yield k+(k1,), v1
             else:
-                yield k0+k, v
+                yield k, v
 
     def walkdicts(self):
         yieldself=True
