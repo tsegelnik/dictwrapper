@@ -248,6 +248,8 @@ class DictWrapper(ClassWrapper):
                 for k1, v1 in v.items():
                     if isinstance(k1, tuple):
                         yield k0+k+k1, v1
+                    elif isinstance(k1, frozenset):
+                        yield k0+k+tuple(sorted(k1)), v1
                     else:
                         yield k0+k+(k1,), v1
             else:

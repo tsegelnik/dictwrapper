@@ -92,3 +92,8 @@ def test_dictwrapper_storage():
 
     with raises(TypeError):
         ('root', 'subfolder2', 'st', 'a1', 'b1', 'c1') in dwerror
+
+    # Walks
+    for k, v in dw.walkitems():
+        print(k, v)
+
