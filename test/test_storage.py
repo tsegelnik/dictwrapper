@@ -48,15 +48,15 @@ def test_slice_filter():
         )
     )
     assert storage.slice("a", "b", "c") == {
-        frozenset({"a", "b", "c"}): 2,
-        frozenset({"a", "b", "c", "d"}): 3,
+        ("a", "b", "c"): 2,
+        ("a", "b", "c", "d"): 3,
     }
     assert storage.slice("a", "b", "c", "d") == {
-        frozenset({"a", "b", "c", "d"}): 3,
+        ("a", "b", "c", "d"): 3,
     }
     assert storage.slice(
         filterkey=lambda key: all(elem != "d" for elem in key)
     ) == {
-        frozenset({"a", "b", "c"}): 2,
-        frozenset({"a", "b"}): 1,
+        ("a", "b", "c"): 2,
+        ("a", "b"): 1,
     }

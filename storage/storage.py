@@ -12,11 +12,9 @@ class Storage(UserDict):
         self._protect = protect
         UserDict.__init__(*args, **kwargs)
 
-    def _process_key(self, key: Any) -> frozenset:
-        if isinstance(key, frozenset):
-            return key
-        elif isinstance(key, (Sequence, Set)):
-            return frozenset(key)
+    def _process_key(self, key: Any) -> tuple:
+        if isinstance(key, Sequence):
+            return tuple(sorted(key))
         else:
             return frozenset((key,))
 
@@ -57,7 +55,7 @@ class Storage(UserDict):
         """
         res = super().items()
         if args:
-            args = frozenset(args)
+            args = set(args)
             res = (elem for elem in res if args.issubset(elem[0]))
         if filterkey:
             res = (elem for elem in res if filterkey(elem[0]))
