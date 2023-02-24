@@ -67,7 +67,8 @@ class Storage(UserDict):
                 for elem in res
                 if all(filterkeyelem(key) for key in elem[0])
             )
-        return tuple(res)
+
+        yield from res
 
     def slice(self, *args, **kwargs) -> Storage:
         """

@@ -30,11 +30,11 @@ def test_slice_filter():
     storage["a", "b", "c"] = 2
     storage["a", "c", "d", "b"] = 3
     assert all(
-        len(x) == 3
+        len(tuple(x)) == 3
         for x in (storage.items(), storage.items("a"), storage.items("a", "b"))
     )
-    assert len(storage.items("a", "b", "c")) == 2
-    assert len(storage.items("a", "b", "d", "c")) == 1
+    assert len(tuple(storage.items("a", "b", "c"))) == 2
+    assert len(tuple(storage.items("a", "b", "d", "c"))) == 1
     assert isinstance(storage.slice("a"), Storage)
     assert all(
         x == storage
@@ -44,7 +44,7 @@ def test_slice_filter():
             storage.slice(
                 filterkey=lambda key: all(elem in "abcd" for elem in key)
             ),
-            storage.slice(filterkeyelem=lambda key: key in "abcd"),
+            storage.slice(filterkeyelem=lambda key: key in "abcd")
         )
     )
     assert storage.slice("a", "b", "c") == {
