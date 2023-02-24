@@ -244,6 +244,12 @@ class DictWrapper(ClassWrapper):
             if isinstance(v, self._wrapper_class):
                 for k1, v1 in v.walkitems(maxdepth=nextdepth):
                     yield k0+k+k1, v1
+            elif not self._not_recursive_to_others and isinstance(v, MutableMapping):
+                for k1, v1 in v.items():
+                    if isinstance(k1, tuple):
+                        yield k0+k+k1, v1
+                    else:
+                        yield k0+k+(k1,), v1
             else:
                 yield k0+k, v
 
