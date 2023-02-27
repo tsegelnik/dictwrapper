@@ -19,7 +19,7 @@ def MakeDictWrapperVisitor(fcn):
         return fcn
 
     if not callable(fcn):
-        raise TypeError('Expect function, got '+type(fcn).__name__)
+        raise TypeError(f'Expect function, got {type(fcn).__name__}')
 
     ret=DictWrapperVisitor()
     ret.visit = fcn

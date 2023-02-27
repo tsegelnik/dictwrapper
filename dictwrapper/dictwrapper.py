@@ -180,7 +180,7 @@ class DictWrapper(ClassWrapper):
             return True
         key, rest=self.splitkey(key)
 
-        if not key in self._object:
+        if key not in self._object:
             return False
 
         if rest:
@@ -220,16 +220,11 @@ class DictWrapper(ClassWrapper):
     def walkitems(self, startfromkey=(), *, appendstartkey=False, maxdepth=None):
         v0 = self[startfromkey]
         k0 = tuple(self.iterkey(startfromkey))
-        startdepth=len(k0)
 
         if maxdepth is None:
             nextdepth=None
         else:
-            maxdepth-=startdepth
-
-            nextdepth=maxdepth-1
-            if nextdepth<0:
-                nextdepth=0
+            nextdepth=max(maxdepth-len(k0)-1, 0)
 
         if maxdepth==0 or not isinstance(v0, self._wrapper_class):
             if appendstartkey:
