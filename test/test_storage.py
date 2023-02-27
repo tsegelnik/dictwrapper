@@ -30,11 +30,11 @@ def test_slice_filter():
     storage["a", "b", "c"] = 2
     storage["a", "c", "d", "b"] = 3
     assert all(
-        len(x) == 3
+        len(tuple(x)) == 3
         for x in (storage.items(), storage.items("a"), storage.items("a", "b"))
     )
-    assert len(storage.items("a", "b", "c")) == 2
-    assert len(storage.items("a", "b", "d", "c")) == 1
+    assert len(tuple(storage.items("a", "b", "c"))) == 2
+    assert len(tuple(storage.items("a", "b", "d", "c"))) == 1
     assert isinstance(storage.slice("a"), Storage)
     assert all(
         x == storage
@@ -44,19 +44,19 @@ def test_slice_filter():
             storage.slice(
                 filterkey=lambda key: all(elem in "abcd" for elem in key)
             ),
-            storage.slice(filterkeyelem=lambda key: key in "abcd"),
+            storage.slice(filterkeyelem=lambda key: key in "abcd")
         )
     )
     assert storage.slice("a", "b", "c") == {
-        frozenset({"a", "b", "c"}): 2,
-        frozenset({"a", "b", "c", "d"}): 3,
+        ("a", "b", "c"): 2,
+        ("a", "b", "c", "d"): 3,
     }
     assert storage.slice("a", "b", "c", "d") == {
-        frozenset({"a", "b", "c", "d"}): 3,
+        ("a", "b", "c", "d"): 3,
     }
     assert storage.slice(
         filterkey=lambda key: all(elem != "d" for elem in key)
     ) == {
-        frozenset({"a", "b", "c"}): 2,
-        frozenset({"a", "b"}): 1,
+        ("a", "b", "c"): 2,
+        ("a", "b"): 1,
     }
