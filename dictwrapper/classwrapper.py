@@ -3,7 +3,7 @@ from typing import Any
 class ClassWrapper(object):
     _object: Any
     _types: Any
-    def __init__(self, obj, *, parent=None, types=None):
+    def __init__(self, obj, *, types=None):
         self._object = obj
         if types:
             self._types = types
@@ -39,12 +39,12 @@ class ClassWrapper(object):
 
         return self._object==other
 
-    def _wrap(self, obj):
+    def _wrap(self, obj, **kwargs):
         if isinstance(obj, ClassWrapper):
             return obj
 
         if isinstance(obj, self._types):
-            return self._wrapper_class(obj, parent=self)
+            return self._wrapper_class(obj, **kwargs)
 
         return obj
 

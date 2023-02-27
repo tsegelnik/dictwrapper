@@ -53,7 +53,7 @@ class DictWrapper(ClassWrapper):
             ret = self[key]
         except KeyError:
             ret = self[key]=self._types()
-            return self._wrap(ret)
+            return self._wrap(ret, parent=self)
 
         if not isinstance(ret, self._wrapper_class):
             raise KeyError('Child {!s} is not DictWrapper'.format(key))
@@ -88,9 +88,10 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            return self._wrap(self._object.get(key, *args, **kwargs))
+            ret = self._object.get(key, *args, **kwargs)
+            return self._wrap(ret, parent=self)
 
-        sub = self._wrap(self._object.get(key))
+        sub = self._wrap(self._object.get(key), parent=self)
         if sub is None:
             if args:
                 return args[0]
@@ -106,7 +107,8 @@ class DictWrapper(ClassWrapper):
             return self
         key, rest=self.splitkey(key)
 
-        sub = self._wrap(self._object.__getitem__(key))
+        sub = self._object.__getitem__(key)
+        sub = self._wrap(sub, parent=self)
         if not rest:
             return sub
 
@@ -123,7 +125,7 @@ class DictWrapper(ClassWrapper):
             raise ValueError('May not delete itself')
         key, rest=self.splitkey(key)
 
-        sub = self._wrap(self._object.__getitem__(key))
+        sub = self._wrap(self._object.__getitem__(key), parent=self)
         if not rest:
             del self._object[key]
             return
@@ -138,13 +140,13 @@ class DictWrapper(ClassWrapper):
 
         if not rest:
             ret=self._object.setdefault(key, value)
-            return self._wrap(ret)
+            return self._wrap(ret, parent=self)
 
         if key in self:
-            sub = self._wrap(self._object.get(key))
+            sub = self._wrap(self._object.get(key), parent=self)
         else:
             sub = self._object[key] = self._types()
-            sub = self._wrap(sub)
+            sub = self._wrap(sub, parent=self)
             # # cfg._set_parent( self )
 
         if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
@@ -160,10 +162,10 @@ class DictWrapper(ClassWrapper):
             return value
 
         if key in self:
-            sub = self._wrap(self._object.get(key))
+            sub = self._wrap(self._object.get(key), parent=self)
         else:
             sub = self._object[key] = self._types()
-            sub = self._wrap(sub)
+            sub = self._wrap(sub, parent=self)
             # # cfg._set_parent( self )
 
         if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
@@ -182,7 +184,7 @@ class DictWrapper(ClassWrapper):
             return False
 
         if rest:
-            sub = self._wrap(self._object.get(key))
+            sub = self._wrap(self._object.get(key), parent=self)
 
             if self._not_recursive_to_others and not isinstance(sub, DictWrapper):
                 raise TypeError(f"Nested value for '{key}' has wrong type")
@@ -196,11 +198,11 @@ class DictWrapper(ClassWrapper):
 
     def items(self):
         for k, v in self._object.items():
-            yield k, self._wrap(v)
+            yield k, self._wrap(v, parent=self)
 
     def values(self):
         for v in self._object.values():
-            yield self._wrap(v)
+            yield self._wrap(v, parent=self)
 
     def deepcopy(self):
         new = DictWrapper(self._types(), parent=self._parent, sep=self._sep, recursive_to_others=not self._not_recursive_to_others)
