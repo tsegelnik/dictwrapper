@@ -287,3 +287,24 @@ class DictWrapper(ClassWrapper):
 
         if not parentkey:
             visitor.stop(self)
+
+    def update(self, other) -> 'DictWrapper':
+        for k, v in other.walkitems():
+            self[k] = v
+        return self
+
+    __ior__ = update
+
+    def update_missing(self, other) -> 'DictWrapper':
+        for k, v in other.walkitems():
+            try:
+                key_already_present = k in self
+            except TypeError:
+                raise TypeError(f'Value for part({k}) is non nestable')
+            else:
+                if key_already_present:
+                    raise TypeError(f'Key {k} already present')
+            self[k] = v
+        return self
+
+    __ixor__ = update_missing
