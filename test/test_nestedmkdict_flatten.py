@@ -1,8 +1,26 @@
 from multikeydict.nestedmkdict import NestedMKDict
-from multikeydict.flatten import flatten
+from multikeydict.flatten import flatten, _select
 from pytest import raises
 
 from pprint import pprint
+
+def test__select():
+    a, b = _select(tuple('abcd'), set('cd'))
+    assert a==tuple('ab')
+    assert b==tuple('cd')
+
+    a, b = _select(tuple('abcd'), set('bd'))
+    assert a==tuple('abc')
+    assert b==tuple('d')
+
+    a, b = _select(tuple('abcd'), set('ab'))
+    assert a==tuple('abcd')
+    assert b==tuple()
+
+    a, b = _select(tuple('abcd'), set('ef'))
+    assert a==tuple('abcd')
+    assert b==tuple()
+
 
 def test_nestedmkdict_flatten_v01():
     dct = {'root': {
@@ -111,6 +129,7 @@ def test_nestedmkdict_flatten_v03():
     dwf = flatten(dw, ('a1', 'b1', 'c1', 'a2', 'b2', 'c2'))
     # TODO: this test is insconsistent with test_nestedmkdict_flatten_v02
     # It does the same, but in different order.
+    pprint(dwf.object)
     for obj in (dwf,):
         assert obj['root', 'subfolder2', 'st', 'a1', 'b1', 'c1']=='v1'
         assert obj['root', 'subfolder2', 'st', 'b1', 'a1', 'c1']=='v1'

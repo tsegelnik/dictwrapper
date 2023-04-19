@@ -3,15 +3,16 @@ from .flatmkdict import FlatMKDict
 
 from typing import Sequence, Tuple
 
-def _select(seq: Sequence, elems: set) -> Tuple[Tuple, Tuple]:
+def _select(seq: Sequence, elems_mask: set) -> Tuple[Tuple, Tuple]:
 	selected = []
-	rest = []
-	for el in seq:
-		if el in elems:
+	rest = ()
+	for i, el in enumerate(reversed(seq), 0):
+		if el in elems_mask:
 			selected.append(el)
 		else:
-			rest.append(el)
-	return tuple(rest), tuple(selected)
+			rest = tuple(seq[:len(seq)-i])
+			break
+	return tuple(rest), tuple(reversed(selected))
 
 def flatten(mkdict, selkeys: Sequence=()) -> NestedMKDict:
 	selkeys_set = set(selkeys)
