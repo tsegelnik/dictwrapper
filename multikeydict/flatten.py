@@ -1,9 +1,9 @@
 from .nestedmkdict import NestedMKDict
 from .flatmkdict import FlatMKDict
 
-from typing import Sequence
+from typing import Sequence, Tuple
 
-def _select(seq: Sequence, elems: set):
+def _select(seq: Sequence, elems: set) -> Tuple[Tuple, Tuple]:
 	selected = []
 	rest = []
 	for el in seq:
@@ -11,7 +11,7 @@ def _select(seq: Sequence, elems: set):
 			selected.append(el)
 		else:
 			rest.append(el)
-	return rest, selected
+	return tuple(rest), tuple(selected)
 
 def flatten(mkdict, selkeys: Sequence=()) -> NestedMKDict:
 	selkeys_set = set(selkeys)
@@ -23,11 +23,11 @@ def flatten(mkdict, selkeys: Sequence=()) -> NestedMKDict:
 		if keys_flat:
 			flatdict = newdict.get(keys_nested, None)
 			if flatdict is None:
-				newdict[keys_nested] = (flatdict:=FlatMKDict())
+				newdict[keys_nested] = (flatdict:=FlatMKDict(((keys_flat, v),),))
 			else:
 				if not isinstance(flatdict, FlatMKDict):
 					raise KeyError(f'Unable to flatten: {".".join(key)}')
-			flatdict[keys_flat] = v
+				flatdict[keys_flat] = v
 		else:
 			newdict[key] = v
 
