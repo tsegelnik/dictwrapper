@@ -59,7 +59,7 @@ class FlatMKDict(UserDict):
         *args,
         filterkey: Optional[Callable[[Any], bool]] = None,
         filterkeyelem: Optional[Callable[[Any], bool]] = None,
-    ) -> tuple:
+    ) -> Generator:
         """
         Returns items from the slice by `args`.
         If `args` are empty returns all items.

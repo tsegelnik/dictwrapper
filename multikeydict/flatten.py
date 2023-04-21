@@ -25,10 +25,10 @@ def flatten(mkdict, selkeys: Sequence=()) -> NestedMKDict:
 			flatdict = newdict.get(keys_nested, None)
 			if flatdict is None:
 				newdict[keys_nested] = (flatdict:=FlatMKDict(((keys_flat, v),),))
-			else:
-				if not isinstance(flatdict, FlatMKDict):
-					raise KeyError(f'Unable to flatten: {".".join(key)}')
+			elif isinstance(flatdict, FlatMKDict):
 				flatdict[keys_flat] = v
+			else:
+				raise KeyError(f'Unable to flatten: {".".join(key)}')
 		else:
 			newdict[key] = v
 
