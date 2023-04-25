@@ -1,5 +1,5 @@
 from .classwrapper import ClassWrapper
-from .visitor import MakeNestedMKDictVisitor
+from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 
 from collections.abc import Sequence, MutableMapping
@@ -277,7 +277,7 @@ class NestedMKDict(ClassWrapper):
         for _, v in self.walkitems(*args, **kwargs):
             yield v
 
-    def visit(self, visitor, parentkey=()):
+    def visit(self, visitor, parentkey=()) -> NestedMKDictVisitor:
         visitor = MakeNestedMKDictVisitor(visitor)
 
         if not parentkey:
@@ -295,6 +295,8 @@ class NestedMKDict(ClassWrapper):
 
         if not parentkey:
             visitor.stop(self)
+
+        return visitor
 
     def update(self, other) -> 'NestedMKDict':
         for k, v in other.walkitems():
