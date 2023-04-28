@@ -261,20 +261,34 @@ def test_nestedmkdict_09_walkitems():
         }
     }
     dct['z'] = {}
-    dw = NestedMKDict(dct, sep='.')
+    dw = NestedMKDict(dct)
+    dws = NestedMKDict(dct, sep='.')
 
     imaxlist=[5, 0, 6, 5, 5, 5, 5, 5, 5]
     for imax, maxdepth in zip(imaxlist, [None]+list(range(len(imaxlist)))):
         i=0
         print(f'{imax=}, {maxdepth=}')
         maxk = -1
-        for i, (k, v) in enumerate(dw.walkitems(maxdepth=maxdepth)):
+        for i, (k, v) in enumerate(dws.walkitems(maxdepth=maxdepth)):
             print(i, k, v)
             assert maxdepth is None or len(k)<=maxdepth
             maxk=max(maxk, len(k))
         print(f'{maxk=}')
         print()
         assert i==imax
+
+    wkeys = [ 'a', 'b', 'c', 'c1.i.j.k.l', 'd.e', 'f.g.h' ]
+    assert wkeys==list(dw.walkjoinedkeys())
+    assert wkeys==list(dws.walkjoinedkeys())
+    wkeys = [s.replace('.', '/') for s in wkeys]
+    assert wkeys==list(dw.walkjoinedkeys(sep='/'))
+    assert wkeys==list(dws.walkjoinedkeys(sep='/'))
+
+    wkeys = [tuple(s.split('.')) for s in ('c1.i.j.k', 'd', 'f.g', 'z')]
+    assert wkeys==[k for k,_ in dw.walkdicts()]
+
+    wkeys = [tuple(s.split('.')) for s in ('c1.i', 'd', 'f.g')]
+    assert wkeys==[k for k,_ in dw.walkdicts(ignorekeys=('z', 'j'))]
 
 def test_nestedmkdict_09_walk():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
