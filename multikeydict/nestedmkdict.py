@@ -258,13 +258,14 @@ class NestedMKDict(ClassWrapper):
             else:
                 yield k, v
 
-    def walkdicts(self):
-        yieldself=True
+    def walkdicts(self, *, yieldself=False, ignorekeys: Sequence=()):
         for k, v in self.items():
+            if k in ignorekeys:
+                continue
             k = k,
             if isinstance(v, self._wrapper_class):
                 yieldself=False
-                for k1, v1 in v.walkdicts():
+                for k1, v1 in v.walkdicts(yieldself=True, ignorekeys=ignorekeys):
                     yield k+k1, v1
         if yieldself:
             yield (), self
@@ -272,6 +273,14 @@ class NestedMKDict(ClassWrapper):
     def walkkeys(self, *args, **kwargs):
         for k, _ in self.walkitems(*args, **kwargs):
             yield k
+
+    def walkjoinedkeys(self, *args, sep: Optional[str]=None, **kwargs):
+        if sep is None:
+            sep = self._sep
+        if sep is None:
+            sep = '.'
+        for k, _ in self.walkitems(*args, **kwargs):
+            yield sep.join(k)
 
     def walkvalues(self, *args, **kwargs):
         for _, v in self.walkitems(*args, **kwargs):
