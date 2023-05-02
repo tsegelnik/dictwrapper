@@ -3,7 +3,7 @@ from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 
 from collections.abc import Sequence, MutableMapping
-from typing import Any, Optional
+from typing import Any, Optional, Tuple, Generator
 
 class NestedMKDict(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
@@ -274,13 +274,21 @@ class NestedMKDict(ClassWrapper):
         for k, _ in self.walkitems(*args, **kwargs):
             yield k
 
-    def walkjoinedkeys(self, *args, sep: Optional[str]=None, **kwargs):
+    def walkjoinedkeys(self, *args, sep: Optional[str]=None, **kwargs) -> Generator[str, None, None]:
         if sep is None:
             sep = self._sep
         if sep is None:
             sep = '.'
         for k, _ in self.walkitems(*args, **kwargs):
             yield sep.join(k)
+
+    def walkjoineditems(self, *args, sep: Optional[str]=None, **kwargs) -> Generator[Tuple[str, Any], None, None]:
+        if sep is None:
+            sep = self._sep
+        if sep is None:
+            sep = '.'
+        for k, v in self.walkitems(*args, **kwargs):
+            yield sep.join(k), v
 
     def walkvalues(self, *args, **kwargs):
         for _, v in self.walkitems(*args, **kwargs):
