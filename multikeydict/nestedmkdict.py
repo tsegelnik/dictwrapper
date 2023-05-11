@@ -75,7 +75,7 @@ class NestedMKDict(ClassWrapper):
         else:
             yield key
 
-    def splitkey(self, key):
+    def splitkey(self, key) -> Any:
         it = self.iterkey(key)
         try:
             return next(it), tuple(it)
@@ -102,7 +102,7 @@ class NestedMKDict(ClassWrapper):
 
         return sub.get(rest, *args, **kwargs)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Any:
         if key==():
             return self
         head, rest=self.splitkey(key)
@@ -140,7 +140,7 @@ class NestedMKDict(ClassWrapper):
 
         del sub[rest]
 
-    def setdefault(self, key, value):
+    def setdefault(self, key, value) -> Any:
         key, rest=self.splitkey(key)
 
         if not rest:

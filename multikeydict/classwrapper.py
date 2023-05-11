@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 class ClassWrapper(object):
     __slots__ = ('_object', '_types', '_wrapper_class')
@@ -14,31 +14,31 @@ class ClassWrapper(object):
     def object(self) -> Any:
         return self._object
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._object)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self._object)
 
-    def __dir__(self):
+    def __dir__(self) -> List[str]:
         return dir(self._object)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._object)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self._object)
 
-    def __contains__(self, v):
+    def __contains__(self, v) -> bool:
         return v in self._object
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, ClassWrapper):
             return self._object==other._object
 
         return self._object==other
 
-    def _wrap(self, obj, **kwargs):
+    def _wrap(self, obj, **kwargs) -> Any:
         if isinstance(obj, ClassWrapper):
             return obj
 
