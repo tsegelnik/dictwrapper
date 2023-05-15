@@ -2,9 +2,7 @@ from .classwrapper import ClassWrapper
 from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 
-from collections.abc import Sequence, MutableMapping
-from typing import Any, Optional, Tuple, Generator
-
+from typing import Any, Optional, Tuple, Generator, Sequence, MutableMapping
 class NestedMKDict(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
         The following functionality is implemented:

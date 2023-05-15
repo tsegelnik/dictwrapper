@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from collections import UserDict
-from collections.abc import Sequence
-from typing import Any, Callable, Generator, Optional
-
+from typing import Any, Callable, Generator, Optional, Sequence
 class FlatMKDict(UserDict):
     __slots__ = ('_protect', '_merge_flatdicts')
     _protect: bool
