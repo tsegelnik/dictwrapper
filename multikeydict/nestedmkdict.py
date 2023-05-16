@@ -207,6 +207,13 @@ class NestedMKDict(ClassWrapper):
         for v in self._object.values():
             yield self._wrap(v, parent=self)
 
+    def value(self, key):
+        value = self[key]
+        if isinstance(value, NestedMKDict):
+            raise ValueError(f"Key {key} points to the NestedMKDict, not value")
+
+        return value
+
     def copy(self) -> 'NestedMKDict':
         return NestedMKDict(self.object.copy(), parent=self._parent, sep=self._sep, recursive_to_others=not self._not_recursive_to_others)
 
