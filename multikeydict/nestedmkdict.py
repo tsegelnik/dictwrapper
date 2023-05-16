@@ -46,11 +46,13 @@ class NestedMKDict(ClassWrapper):
     def parent(self):
         return self._parent
 
-    def child(self, key, *args, **kwargs):
+    def child(self, key, *args, type=None, **kwargs):
         try:
             ret = self(key)
         except KeyError:
-            self[key] = (ret:=self._types(*args, **kwargs))
+            if type is None:
+                type = self._types
+            self[key] = (ret:=type(*args, **kwargs))
             return self._wrap(ret, parent=self)
 
         if not isinstance(ret, self._wrapper_class):
@@ -261,13 +263,6 @@ class NestedMKDict(ClassWrapper):
     def values(self):
         for v in self._object.values():
             yield self._wrap(v, parent=self)
-
-    def value(self, key):
-        value = self[key]
-        if isinstance(value, NestedMKDict):
-            raise ValueError(f"Key {key} points to the NestedMKDict, not value")
-
-        return value
 
     def copy(self) -> 'NestedMKDict':
         return NestedMKDict(self.object.copy(), parent=self._parent, sep=self._sep, recursive_to_others=not self._not_recursive_to_others)
