@@ -1,5 +1,6 @@
 from multikeydict.nestedmkdict import NestedMKDict
 import pytest
+from pytest import raises
 
 def test_nestedmkdict_01():
     dw = NestedMKDict({})
@@ -56,28 +57,21 @@ def test_nestedmkdict_04(sep):
     assert dw.get(('d', 'e'))==4
     assert dw.get(('d', 'e1')) is None
     assert dw.get(('f', 'g', 'h'))==5
-    try:
+    with raises(KeyError):
         dw.get(('z', 'z', 'z'))
-        assert False
-    except KeyError:
-        pass
 
     #
     # Test getitem tuple
     #
     assert dw[('d', 'e')]==4
-    try:
+    with raises(KeyError):
         dw[('d', 'e1')]
-        assert False
-    except KeyError:
-        pass
+
     assert dw[('f', 'g', 'h')]==5
 
-    try:
+    with raises(KeyError):
         dw[('z', 'z', 'z')]
         assert False
-    except KeyError:
-        pass
 
     #
     # Test get sep
@@ -88,38 +82,28 @@ def test_nestedmkdict_04(sep):
         assert dw.get('d.e') is None
 
     if sep:
-        try:
+        with raises(KeyError):
             dw.get('z.z.z')
-            assert False
-        except KeyError:
-            pass
     else:
         assert dw.get('z.z.z')==0
 
     #
     # Test getitem sep
     #
-    try:
-        assert dw['d.e']==4
-        assert sep is not None
-    except KeyError:
-        pass
+    if sep is None:
+        with raises(KeyError):
+            assert dw['d.e']==4
 
-    try:
-        assert dw['f.g.h']==5
-        assert dw[('f.g', 'h')]==5
-        assert sep is not None
-    except KeyError:
-        pass
+        with raises(KeyError):
+            assert dw['f.g.h']==5
 
-    if sep:
-        try:
-            dw['z.z.z']
-            assert False
-        except KeyError:
-            pass
-    else:
+        with raises(KeyError):
+            assert dw[('f.g', 'h')]==5
+
         assert dw['z.z.z']==0
+    else:
+        with raises(KeyError):
+            dw['z.z.z']
 
     #
     # Test contains
@@ -153,11 +137,8 @@ def test_nestedmkdict_04(sep):
     # Test recursive setitem
     #
     dw[('k', 'l', 'm', 'n')] = 5
-    try:
+    with raises(ValueError):
         dw.child(tuple('klmn'))
-        assert False
-    except KeyError:
-        pass
     assert dw.get(('k', 'l', 'm', 'n')) == 5
 
     dw[('o.l.m.n')] = 6

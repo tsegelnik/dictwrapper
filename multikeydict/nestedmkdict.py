@@ -46,11 +46,11 @@ class NestedMKDict(ClassWrapper):
     def parent(self):
         return self._parent
 
-    def child(self, key):
+    def child(self, key, *args, **kwargs):
         try:
-            ret = self.any(key)
+            ret = self(key)
         except KeyError:
-            self[key] = (ret:=self._types())
+            self[key] = (ret:=self._types(*args, **kwargs))
             return self._wrap(ret, parent=self)
 
         if not isinstance(ret, self._wrapper_class):
@@ -58,7 +58,30 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    __call__ = child
+    def __call__(self, key):
+        if key==():
+            return self
+        head, rest=self.splitkey(key)
+
+        try:
+            sub = self._object.__getitem__(head)
+        except KeyError as e:
+            raise KeyError(key) from e
+
+        if rest:
+            sub = self._wrap(sub, parent=self)
+            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+                raise TypeError(f"Nested value for '{key}' has wrong type")
+
+            try:
+                return sub.child(rest)
+            except KeyError as e:
+                raise KeyError(key) from e
+
+        if not isinstance(sub, (ClassWrapper, self._types)):
+            raise ValueError(f"Invalid value type {type(sub)} for key {key}")
+
+        return self._wrap_(sub, parent=self)
 
     def keys(self):
         return self._object.keys()
