@@ -48,15 +48,17 @@ class NestedMKDict(ClassWrapper):
 
     def child(self, key):
         try:
-            ret = self[key]
+            ret = self.any(key)
         except KeyError:
-            ret = self[key]=self._types()
+            self[key] = (ret:=self._types())
             return self._wrap(ret, parent=self)
 
         if not isinstance(ret, self._wrapper_class):
             raise KeyError('Child {!s} is not NestedMKDict'.format(key))
 
         return ret
+
+    __call__ = child
 
     def keys(self):
         return self._object.keys()
@@ -80,48 +82,78 @@ class NestedMKDict(ClassWrapper):
         except StopIteration:
             return None, None
 
-    def get(self, key, *args, **kwargs):
-        if key==():
-            return self
-        key, rest=self.splitkey(key)
-
-        if not rest:
-            ret = self._object.get(key, *args, **kwargs)
-            return self._wrap(ret, parent=self)
-
-        sub = self._wrap(self._object.get(key), parent=self)
-        if sub is None:
-            if args:
-                return args[0]
-            raise KeyError(f"No nested key '{key}'")
-
-        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-            raise TypeError(f"Nested value for '{key}' has wrong type")
-
-        return sub.get(rest, *args, **kwargs)
-
-    def __getitem__(self, key) -> Any:
+    def any(self, key) -> Any:
         if key==():
             return self
         head, rest=self.splitkey(key)
 
-        sub = self._object.__getitem__(head)
+        try:
+            sub = self._object.__getitem__(head)
+        except KeyError as e:
+            raise KeyError(f"No nested key '{key}'") from e
+
         if not rest:
             sub = self._wrap(sub, parent=self)
             return sub
-
-        if sub is None:
-            raise KeyError( f"No nested key '{key}'" )
 
         sub = self._wrap(sub, parent=self)
         if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
             raise TypeError(f"Nested value for '{key}' has wrong type")
 
         try:
-            return sub[rest]
+            return sub.any(rest)
         except KeyError as e:
             raise KeyError(key) from e
 
+    def get(self, key, default=None):
+        if key==():
+            raise ValueError(f"May not return self")
+
+        head, rest=self.splitkey(key)
+
+        if not head in self._object:
+            if rest:
+                raise KeyError(key)
+            else:
+                return default
+
+        sub = self._object.get(head)
+        if rest:
+            sub = self._wrap(sub, parent=self)
+            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+                raise TypeError(f"Nested value for '{key}' has wrong type")
+
+            return sub.get(rest, default)
+
+        if isinstance(sub, (ClassWrapper, self._types)):
+            raise ValueError(f"Invalid value type {type(sub)} for key {key}")
+
+        return sub
+
+    def __getitem__(self, key) -> Any:
+        if key==():
+            raise ValueError(f"May not return self")
+
+        head, rest=self.splitkey(key)
+
+        try:
+            sub = self._object.__getitem__(head)
+        except KeyError as e:
+            raise KeyError(key) from e
+
+        if rest:
+            sub = self._wrap(sub, parent=self)
+            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+                raise TypeError(f"Nested value for '{key}' has wrong type")
+
+            try:
+                return sub[rest]
+            except KeyError as e:
+                raise KeyError(key) from e
+
+        if isinstance(sub, (ClassWrapper, self._types)):
+            raise ValueError(f"Invalid value type {type(sub)} for key {key}")
+        return sub
 
     def __delitem__(self, key):
         if key==():
@@ -231,7 +263,7 @@ class NestedMKDict(ClassWrapper):
         return new
 
     def walkitems(self, startfromkey=(), *, appendstartkey=False, maxdepth=None):
-        v0 = self[startfromkey]
+        v0 = self.any(startfromkey)
         k0 = tuple(self.iterkey(startfromkey))
 
         if maxdepth is None:
