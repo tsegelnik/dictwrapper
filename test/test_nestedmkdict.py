@@ -45,9 +45,9 @@ def test_nestedmkdict_04(sep):
     assert isinstance(dw('d'), NestedMKDict)
     assert isinstance(dw(('f', 'g')), NestedMKDict)
 
-    with raises(ValueError):
+    with raises(TypeError):
         assert isinstance(dw['d'], NestedMKDict)
-    with raises(ValueError):
+    with raises(TypeError):
         assert isinstance(dw[('f', 'g')], NestedMKDict)
 
 
@@ -137,7 +137,7 @@ def test_nestedmkdict_04(sep):
     # Test recursive setitem
     #
     dw[('k', 'l', 'm', 'n')] = 5
-    with raises(ValueError):
+    with raises(TypeError):
         dw.child(tuple('klmn'))
     assert dw.get(('k', 'l', 'm', 'n')) == 5
 

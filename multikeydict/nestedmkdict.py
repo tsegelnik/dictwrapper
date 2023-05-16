@@ -81,7 +81,7 @@ class NestedMKDict(ClassWrapper):
                 raise KeyError(key) from e
 
         if not isinstance(sub, (ClassWrapper, self._types)):
-            raise ValueError(f"Invalid value type {type(sub)} for key {key}")
+            raise TypeError(f"Invalid value type {type(sub)} for key {key}")
 
         return self._wrap_(sub, parent=self)
 
@@ -132,7 +132,7 @@ class NestedMKDict(ClassWrapper):
 
     def get(self, key, default=None):
         if key==():
-            raise ValueError(f"May not return self")
+            raise TypeError(f"May not return self")
 
         head, rest=self.splitkey(key)
 
@@ -151,13 +151,13 @@ class NestedMKDict(ClassWrapper):
             return sub.get(rest, default)
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise ValueError(f"Invalid value type {type(sub)} for key {key}")
+            raise TypeError(f"Invalid value type {type(sub)} for key {key}")
 
         return sub
 
     def __getitem__(self, key) -> Any:
         if key==():
-            raise ValueError(f"May not return self")
+            raise TypeError(f"May not return self")
 
         head, rest=self.splitkey(key)
 
@@ -177,7 +177,7 @@ class NestedMKDict(ClassWrapper):
                 raise KeyError(key) from e
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise ValueError(f"Invalid value type {type(sub)} for key {key}")
+            raise TypeError(f"Invalid value type {type(sub)} for key {key}")
         return sub
 
     def __delitem__(self, key):
