@@ -47,3 +47,5 @@ class ClassWrapper(object):
 
         return obj
 
+    def _wrap_(self, obj, **kwargs) -> Any:
+        return self._wrapper_class(obj, **kwargs)

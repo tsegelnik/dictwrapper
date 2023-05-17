@@ -1,5 +1,6 @@
 from multikeydict.nestedmkdict import NestedMKDict
 import pytest
+from pytest import raises
 
 def test_nestedmkdict_01():
     dw = NestedMKDict({})
@@ -35,14 +36,20 @@ def test_nestedmkdict_04(sep):
     #
     # Test self access
     #
-    assert dw.get(()).object is dct
-    assert dw[()].object is dct
+    assert dw.child(()).object is dct
+    assert dw(()).object is dct
 
     #
     # Test wrapping
     #
-    assert isinstance(dw.get('d'), NestedMKDict)
-    assert isinstance(dw.get(('f', 'g')), NestedMKDict)
+    assert isinstance(dw('d'), NestedMKDict)
+    assert isinstance(dw(('f', 'g')), NestedMKDict)
+
+    with raises(TypeError):
+        assert isinstance(dw['d'], NestedMKDict)
+    with raises(TypeError):
+        assert isinstance(dw[('f', 'g')], NestedMKDict)
+
 
     #
     # Test get tuple
@@ -50,28 +57,21 @@ def test_nestedmkdict_04(sep):
     assert dw.get(('d', 'e'))==4
     assert dw.get(('d', 'e1')) is None
     assert dw.get(('f', 'g', 'h'))==5
-    try:
+    with raises(KeyError):
         dw.get(('z', 'z', 'z'))
-        assert False
-    except KeyError:
-        pass
 
     #
     # Test getitem tuple
     #
     assert dw[('d', 'e')]==4
-    try:
+    with raises(KeyError):
         dw[('d', 'e1')]
-        assert False
-    except KeyError:
-        pass
+
     assert dw[('f', 'g', 'h')]==5
 
-    try:
+    with raises(KeyError):
         dw[('z', 'z', 'z')]
         assert False
-    except KeyError:
-        pass
 
     #
     # Test get sep
@@ -82,38 +82,28 @@ def test_nestedmkdict_04(sep):
         assert dw.get('d.e') is None
 
     if sep:
-        try:
+        with raises(KeyError):
             dw.get('z.z.z')
-            assert False
-        except KeyError:
-            pass
     else:
         assert dw.get('z.z.z')==0
 
     #
     # Test getitem sep
     #
-    try:
-        assert dw['d.e']==4
-        assert sep is not None
-    except KeyError:
-        pass
+    if sep is None:
+        with raises(KeyError):
+            assert dw['d.e']==4
 
-    try:
-        assert dw['f.g.h']==5
-        assert dw[('f.g', 'h')]==5
-        assert sep is not None
-    except KeyError:
-        pass
+        with raises(KeyError):
+            assert dw['f.g.h']==5
 
-    if sep:
-        try:
-            dw['z.z.z']
-            assert False
-        except KeyError:
-            pass
-    else:
+        with raises(KeyError):
+            assert dw[('f.g', 'h')]==5
+
         assert dw['z.z.z']==0
+    else:
+        with raises(KeyError):
+            dw['z.z.z']
 
     #
     # Test contains
@@ -134,24 +124,21 @@ def test_nestedmkdict_04(sep):
     #
     # Test parents
     #
-    g = dw.get(('f', 'g'))
+    g = dw(('f', 'g'))
     assert g.parent().parent() is dw
 
     #
     # Test children
     #
     m=dw.child(('k', 'l', 'm'))
-    assert dw.get(('k', 'l', 'm')).object is m.object
+    assert dw(('k', 'l', 'm')).object is m.object
 
     #
     # Test recursive setitem
     #
     dw[('k', 'l', 'm', 'n')] = 5
-    try:
+    with raises(TypeError):
         dw.child(tuple('klmn'))
-        assert False
-    except KeyError:
-        pass
     assert dw.get(('k', 'l', 'm', 'n')) == 5
 
     dw[('o.l.m.n')] = 6
@@ -185,14 +172,14 @@ def test_nestedmkdict_06_inheritance():
 
     dw = NestedMKDictA(dct, sep='.')
     assert dw.count()==7
-    assert dw['d'].count()==1
-    assert dw['f'].count()==2
-    assert dw['f.g'].count()==2
+    assert dw('d').count()==1
+    assert dw('f').count()==2
+    assert dw('f.g').count()==2
     assert dw._.f._.count()==2
 
     assert dw.depth()==3
-    assert dw['d'].depth()==1
-    assert dw['f'].depth()==2
+    assert dw('d').depth()==1
+    assert dw('f').depth()==2
 
 def test_nestedmkdict_07_delete():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
@@ -221,7 +208,7 @@ def test_nestedmkdict_08_create():
     assert dw._.i.k.l==3
 
     child = dw.child('child')
-    assert dw['child'].object=={}
+    assert dw('child').object=={}
 
 def test_nestedmkdict_09_dictcopy():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
@@ -232,9 +219,9 @@ def test_nestedmkdict_09_dictcopy():
     for i, (k, v) in enumerate(dw1.walkdicts()):
         # print(i, k)
         assert k in dw
-        assert v._object==dw[k]._object
-        assert v._object is not dw[k]._object
-        assert type(v._object) is type(dw[k]._object)
+        assert v._object==dw(k)._object
+        assert v._object is not dw(k)._object
+        assert type(v._object) is type(dw(k)._object)
     assert i==2
 
 def test_nestedmkdict_09_walkitems():
@@ -343,8 +330,8 @@ def test_nestedmkdict_eq_01():
     d = dict(a=dict(b=dict(key='value')))
     dw = NestedMKDict(d)
 
-    assert dw['a']==d['a']
-    assert d['a']==dw['a']
-    assert dw['a']!=d
-    assert dw['a']==dw['a']
-    assert dw['a'] is not dw['a']
+    assert dw('a')==d['a']
+    assert d['a']==dw('a')
+    assert dw('a')!=d
+    assert dw('a')==dw('a')
+    assert dw('a') is not dw('a')

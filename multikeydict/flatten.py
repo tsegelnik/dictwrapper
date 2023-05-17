@@ -22,7 +22,10 @@ def flatten(mkdict, selkeys: Sequence=()) -> NestedMKDict:
 	for key, v in mkdict.walkitems():
 		keys_nested, keys_flat = _select(key, selkeys_set)
 		if keys_flat:
-			flatdict = newdict.get(keys_nested, None)
+			try:
+				flatdict = newdict.any(keys_nested)
+			except KeyError:
+				flatdict = None
 			if flatdict is None:
 				newdict[keys_nested] = (flatdict:=FlatMKDict(((keys_flat, v),),))
 			elif isinstance(flatdict, FlatMKDict):

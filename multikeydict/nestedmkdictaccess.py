@@ -8,7 +8,7 @@ class NestedMKDictAccess(object):
         return self._.child(key)._
 
     def __getattr__(self, key):
-        ret = self._[key]
+        ret = self._.any(key)
 
         if isinstance(ret, self._._wrapper_class):
             return ret._
