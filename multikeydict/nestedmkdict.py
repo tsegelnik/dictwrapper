@@ -2,7 +2,7 @@ from .classwrapper import ClassWrapper
 from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 
-from typing import Any, Optional, Tuple, Generator, Sequence, MutableMapping
+from typing import Any, Optional, Tuple, Generator, Sequence, Mapping
 class NestedMKDict(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
         The following functionality is implemented:
@@ -16,7 +16,7 @@ class NestedMKDict(ClassWrapper):
     _parent: Any
     _not_recursive_to_others: bool
     def __new__(cls, dic, *args, parent=None, sep=None, recursive_to_others=None):
-        if not isinstance(dic, (MutableMapping, NestedMKDict)):
+        if not isinstance(dic, (Mapping, NestedMKDict)):
             return dic
         return ClassWrapper.__new__(cls)
 
@@ -304,7 +304,7 @@ class NestedMKDict(ClassWrapper):
             if isinstance(v, self._wrapper_class):
                 for k1, v1 in v.walkitems(maxdepth=nextdepth):
                     yield k+k1, v1
-            elif not self._not_recursive_to_others and isinstance(v, MutableMapping):
+            elif not self._not_recursive_to_others and isinstance(v, Mapping):
                 for k1, v1 in v.items():
                     if isinstance(k1, tuple):
                         yield k+k1, v1
