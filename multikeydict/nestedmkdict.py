@@ -132,11 +132,11 @@ class NestedMKDict(ClassWrapper):
 
     def get(self, key, default=None):
         if key==():
-            raise TypeError(f"May not return self")
+            raise TypeError("May not return self")
 
         head, rest=self.splitkey(key)
 
-        if not head in self._object:
+        if head not in self._object:
             if rest:
                 raise KeyError(key)
             else:
@@ -157,7 +157,7 @@ class NestedMKDict(ClassWrapper):
 
     def __getitem__(self, key) -> Any:
         if key==():
-            raise TypeError(f"May not return self")
+            raise TypeError("May not return self")
 
         head, rest=self.splitkey(key)
 
