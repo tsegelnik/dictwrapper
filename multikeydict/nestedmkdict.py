@@ -43,8 +43,24 @@ class NestedMKDict(ClassWrapper):
     def _(self):
         return NestedMKDictAccess(self)
 
-    def parent(self):
+    @property
+    def parent(self) -> Optional["NestedMKDict"]:
         return self._parent
+
+    def get_parent(self, level: int=1) -> Optional["NestedMKDict"]:
+        if level==0:
+            return self
+        elif level<0:
+            raise ValueError(f'get_parent: level should be >=0')
+
+        current = self
+        for _ in range(level):
+            newcurrent = current.parent
+            if newcurrent is None:
+                return current
+            current = newcurrent
+
+        return current
 
     def child(self, key, *args, type=None, **kwargs):
         try:

@@ -125,7 +125,11 @@ def test_nestedmkdict_04(sep):
     # Test parents
     #
     g = dw(('f', 'g'))
-    assert g.parent().parent() is dw
+    assert g.parent.parent is dw
+    assert g.get_parent(0) is g
+    assert g.get_parent(1) is g.parent
+    assert g.get_parent(2) is dw
+    assert g.get_parent(10) is dw
 
     #
     # Test children
