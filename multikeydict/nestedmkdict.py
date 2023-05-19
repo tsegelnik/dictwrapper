@@ -387,6 +387,7 @@ class NestedMKDict(ClassWrapper):
         return visitor
 
     def update(self, other) -> 'NestedMKDict':
+        other = self._wrap(other)
         for k, v in other.walkitems():
             self[k] = v
         return self
@@ -394,6 +395,7 @@ class NestedMKDict(ClassWrapper):
     __ior__ = update
 
     def update_missing(self, other) -> 'NestedMKDict':
+        other = self._wrap(other)
         for k, v in other.walkitems():
             try:
                 key_already_present = k in self
