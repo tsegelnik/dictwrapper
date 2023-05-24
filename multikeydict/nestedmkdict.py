@@ -123,7 +123,7 @@ class NestedMKDict(ClassWrapper):
         except StopIteration:
             return None, None
 
-    def any(self, key) -> Any:
+    def any(self, key, *, object: bool=False) -> Any:
         if key==():
             return self
         head, rest=self.splitkey(key)
@@ -134,6 +134,8 @@ class NestedMKDict(ClassWrapper):
             raise KeyError(f"No nested key '{key}'") from e
 
         if not rest:
+            if object:
+                return sub
             sub = self._wrap(sub, parent=self)
             return sub
 
@@ -142,7 +144,7 @@ class NestedMKDict(ClassWrapper):
             raise TypeError(f"Nested value for '{key}' has wrong type")
 
         try:
-            return sub.any(rest)
+            return sub.any(rest, object=object)
         except KeyError as e:
             raise KeyError(key) from e
 

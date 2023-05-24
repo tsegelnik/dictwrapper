@@ -44,6 +44,10 @@ def test_nestedmkdict_04(sep):
     #
     assert isinstance(dw('d'), NestedMKDict)
     assert isinstance(dw(('f', 'g')), NestedMKDict)
+    assert isinstance(dw.any('d'), NestedMKDict)
+    assert isinstance(dw.any(('f', 'g')), NestedMKDict)
+    assert isinstance(dw.any('d', object=True), dict)
+    assert isinstance(dw.any(('f', 'g'), object=True), dict)
 
     with raises(TypeError):
         assert isinstance(dw['d'], NestedMKDict)
@@ -57,6 +61,8 @@ def test_nestedmkdict_04(sep):
     assert dw.get(('d', 'e'))==4
     assert dw.get(('d', 'e1')) is None
     assert dw.get(('f', 'g', 'h'))==5
+    assert dw.any(('f', 'g', 'h'))==5
+    assert dw.any(('f', 'g', 'h'), object=True)==5
     with raises(KeyError):
         dw.get(('z', 'z', 'z'))
 
