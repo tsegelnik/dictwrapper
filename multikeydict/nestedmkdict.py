@@ -15,12 +15,12 @@ class NestedMKDict(ClassWrapper):
     _sep: str
     _parent: Any
     _not_recursive_to_others: bool
-    def __new__(cls, dic, *args, parent=None, sep=None, recursive_to_others=None):
+    def __new__(cls, dic: Mapping, *args, parent=None, sep=None, recursive_to_others=None):
         if not isinstance(dic, (Mapping, NestedMKDict)):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
+    def __init__(self, dic: Mapping, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
         if isinstance(dic, NestedMKDict):
             if sep is None:
                 sep = dic._sep
