@@ -1,6 +1,7 @@
 from .classwrapper import ClassWrapper
 from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
+from .flatmkdict import FlatMKDict
 
 from typing import Any, Optional, Tuple, Generator, Sequence, Mapping, MutableMapping
 class NestedMKDict(ClassWrapper):
@@ -378,6 +379,11 @@ class NestedMKDict(ClassWrapper):
             key = parentkey + (k,)
             if isinstance(v, self._wrapper_class):
                 v.visit(visitor, parentkey=key)
+            elif isinstance(v, FlatMKDict) and not self._not_recursive_to_others:
+                visitor.enterdict(key, v)
+                for subk, subv in v.items():
+                    visitor.visit(key+subk, subv)
+                visitor.exitdict(key, v)
             else:
                 visitor.visit(key, v)
 
