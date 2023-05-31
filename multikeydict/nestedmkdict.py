@@ -2,7 +2,7 @@ from .classwrapper import ClassWrapper
 from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 
-from typing import Any, Optional, Tuple, Generator, Sequence, Mapping
+from typing import Any, Optional, Tuple, Generator, Sequence, Mapping, MutableMapping
 class NestedMKDict(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
         The following functionality is implemented:
@@ -15,12 +15,12 @@ class NestedMKDict(ClassWrapper):
     _sep: str
     _parent: Any
     _not_recursive_to_others: bool
-    def __new__(cls, dic: Mapping, *args, parent=None, sep=None, recursive_to_others=None):
-        if not isinstance(dic, (Mapping, NestedMKDict)):
+    def __new__(cls, dic: MutableMapping={}, *args, **kwargs):
+        if not isinstance(dic, (MutableMapping, NestedMKDict)):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic: Mapping, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
+    def __init__(self, dic: MutableMapping={}, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
         if isinstance(dic, NestedMKDict):
             if sep is None:
                 sep = dic._sep
