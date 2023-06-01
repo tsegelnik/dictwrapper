@@ -53,6 +53,8 @@ def test_nestedmkdict_04(sep):
         assert isinstance(dw['d'], NestedMKDict)
     with raises(TypeError):
         assert isinstance(dw[('f', 'g')], NestedMKDict)
+    with raises(KeyError):
+        dw('i')
 
 
     #

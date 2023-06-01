@@ -83,7 +83,7 @@ class NestedMKDict(ClassWrapper):
         head, rest=self.splitkey(key)
 
         try:
-            sub = self._object.__getitem__(head)
+            sub = self._object[head]
         except KeyError as e:
             raise KeyError(key) from e
 
@@ -93,7 +93,7 @@ class NestedMKDict(ClassWrapper):
                 raise TypeError(f"Nested value for '{key}' has wrong type")
 
             try:
-                return sub.child(rest)
+                return sub(rest)
             except KeyError as e:
                 raise KeyError(key) from e
 
