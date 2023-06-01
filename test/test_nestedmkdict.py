@@ -192,7 +192,15 @@ def test_nestedmkdict_06_inheritance():
     assert dw('f').depth()==2
 
 def test_nestedmkdict_07_delete():
-    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {'h':5}
+                }
+            }
     dct['z.z.z'] = 0
     dw = NestedMKDict(dct)
 
@@ -208,6 +216,34 @@ def test_nestedmkdict_07_delete():
     del dw._.f.g.h
     assert ('f', 'g', 'h') not in dw
     assert ('f', 'g') in dw
+
+def test_nestedmkdict_07a_delete_with_parents():
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {
+                    'h':5
+                }
+                }
+            }
+    dct['z.z.z'] = 0
+    dw = NestedMKDict(dct)
+
+    assert 'a' in dw
+    del dw['a']
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    dw.delete_with_parents(('d', 'e'))
+    assert ('d', 'e') not in dw
+    assert ('d') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    dw.delete_with_parents(('f', 'g', 'h'))
+    assert ('f') in dw
 
 def test_nestedmkdict_08_create():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])

@@ -199,6 +199,23 @@ class NestedMKDict(ClassWrapper):
             raise TypeError(f"Invalid value type {type(sub)} for key {key}")
         return sub
 
+    def delete_with_parents(self, key):
+        if key==():
+            raise ValueError('May not delete itself')
+        key, rest=self.splitkey(key)
+
+        sub = self._wrap(self._object.__getitem__(key), parent=self)
+        if not rest:
+            del self._object[key]
+            return
+
+        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+            raise TypeError(f"Nested value for '{key}' has wrong type")
+
+        del sub[rest]
+        if not sub:
+            del self._object[key]
+
     def __delitem__(self, key):
         if key==():
             raise ValueError('May not delete itself')
