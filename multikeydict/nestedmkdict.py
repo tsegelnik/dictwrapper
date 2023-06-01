@@ -21,7 +21,9 @@ class NestedMKDict(ClassWrapper):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic: MutableMapping={}, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
+    def __init__(self, dic: Optional[MutableMapping]=None, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
+        if dic is None:
+            dic = {}
         if isinstance(dic, NestedMKDict):
             if sep is None:
                 sep = dic._sep
