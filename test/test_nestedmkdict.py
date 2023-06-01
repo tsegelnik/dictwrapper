@@ -233,7 +233,7 @@ def test_nestedmkdict_07a_delete_with_parents():
     dw = NestedMKDict(dct)
 
     assert 'a' in dw
-    del dw['a']
+    dw.delete_with_parents('a')
     assert 'a' not in dw
 
     assert ('d', 'e') in dw
@@ -243,6 +243,60 @@ def test_nestedmkdict_07a_delete_with_parents():
 
     assert ('f', 'g', 'h') in dw
     dw.delete_with_parents(('f', 'g', 'h'))
+    assert ('f') in dw
+
+def test_nestedmkdict_07b_pop():
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {'h':5}
+                }
+            }
+    dct['z.z.z'] = 0
+    dw = NestedMKDict(dct)
+
+    assert 'a' in dw
+    assert dw.pop('a')==1
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    assert dw.pop(('d', 'e'))==4
+    assert ('d', 'e') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    assert dw.pop(('f', 'g', 'h'))==5
+    assert ('f', 'g', 'h') not in dw
+    assert ('f', 'g') in dw
+
+def test_nestedmkdict_07c_pop():
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {
+                    'h':5
+                }
+                }
+            }
+    dct['z.z.z'] = 0
+    dw = NestedMKDict(dct)
+
+    assert 'a' in dw
+    assert dw.pop('a', delete_parents=True)==1
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    assert dw.pop(('d', 'e'), delete_parents=True)==4
+    assert ('d', 'e') not in dw
+    assert ('d') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    assert dw.pop(('f', 'g', 'h'), delete_parents=True)==5
     assert ('f') in dw
 
 def test_nestedmkdict_08_create():
