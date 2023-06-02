@@ -436,3 +436,8 @@ class NestedMKDict(ClassWrapper):
 
     __ixor__ = update_missing
 
+def walkitems(obj: NestedMKDict, *args, **kwargs):
+    if isinstance(obj, NestedMKDict):
+        yield from obj.walkitems(*args, **kwargs)
+    else:
+        yield (), obj
