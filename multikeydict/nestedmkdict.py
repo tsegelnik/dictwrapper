@@ -50,6 +50,16 @@ class NestedMKDict(ClassWrapper):
     def parent(self) -> Optional["NestedMKDict"]:
         return self._parent
 
+    @property
+    def parent_key(self):
+        if not self._parent:
+            return None
+        for key, value in self._parent.items():
+            if isinstance(value, NestedMKDict) and value.object is self.object:
+                return key
+
+        raise RuntimeError("Parent key not identified")
+
     def get_parent(self, level: int=1) -> Optional["NestedMKDict"]:
         if level==0:
             return self
