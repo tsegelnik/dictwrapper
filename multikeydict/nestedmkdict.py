@@ -110,7 +110,7 @@ class NestedMKDict(ClassWrapper):
                 raise KeyError(key) from e
 
         if not isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(f"Invalid value type {type(sub)} for key {key}. Expect mapping. ")
+            raise TypeError(f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .any({key})...")
 
         return self._wrap_(sub, parent=self)
 
@@ -182,7 +182,7 @@ class NestedMKDict(ClassWrapper):
             return sub.get(rest, default)
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(f"Invalid value type {type(sub)} for key {key}. Expect non-mapping.")
+            raise TypeError(f"Invalid value type {type(sub)} for key [{key}]. Expect non-mapping. Perhaps, one should use ({key}) or .any({key})...")
 
         return sub
 
