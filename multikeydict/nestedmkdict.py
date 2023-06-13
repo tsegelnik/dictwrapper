@@ -21,7 +21,7 @@ class NestedMKDict(ClassWrapper):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic: Optional[MutableMapping]=None, *, sep: str=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
+    def __init__(self, dic: Optional[MutableMapping]=None, *, sep: Optional[str]=None, parent: Optional[Any]=None, recursive_to_others: bool=False):
         if dic is None:
             dic = {}
         if isinstance(dic, NestedMKDict):
@@ -54,7 +54,7 @@ class NestedMKDict(ClassWrapper):
         if level==0:
             return self
         elif level<0:
-            raise ValueError(f'get_parent: level should be >=0')
+            raise ValueError('get_parent: level should be >=0')
 
         current = self
         for _ in range(level):
@@ -75,7 +75,7 @@ class NestedMKDict(ClassWrapper):
             return self._wrap(ret, parent=self)
 
         if not isinstance(ret, self._wrapper_class):
-            raise KeyError('Child {!s} is not NestedMKDict'.format(key))
+            raise KeyError(f'Child {key!s} is not NestedMKDict')
 
         return ret
 
@@ -293,9 +293,6 @@ class NestedMKDict(ClassWrapper):
             return rest in sub
 
         return True
-
-    def keys(self):
-        return self._object.keys()
 
     def items(self):
         for k, v in self._object.items():

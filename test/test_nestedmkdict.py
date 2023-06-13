@@ -21,8 +21,8 @@ def test_nestedmkdict_03():
     assert dw.get('a')==1
     assert dw.get('b')==2
     assert dw.get('c')==3
-    assert dw.get('d')==None
-    assert dw.get('d.e')==None
+    assert dw.get('d') is None
+    assert dw.get('d.e') is None
 
     assert tuple(dw.keys())==('a','b','c')
 
@@ -117,17 +117,17 @@ def test_nestedmkdict_04(sep):
     # Test contains
     #
     assert 'a' in dw
-    assert not 'a1' in dw
+    assert 'a1' not in dw
     assert 'd' in dw
 
     #
     # Test contains tuple
     #
     assert ('d', 'e') in dw
-    assert not ('k', 'e') in dw
+    assert ('k', 'e') not in dw
     assert ('f', 'g', 'h') in dw
     assert ('f.g.h' in dw) == bool(sep)
-    assert ('z.z.z' in dw) == bool(not sep)
+    assert ('z.z.z' in dw) == (not sep)
 
     #
     # Test parents
@@ -180,7 +180,7 @@ def test_nestedmkdict_06_inheritance():
             return len(tuple(self.walkitems()))
 
         def depth(self):
-            return max([len(k) for k in self.walkkeys()])
+            return max(len(k) for k in self.walkkeys())
 
     dw = NestedMKDictA(dct, sep='.')
     assert dw.count()==7
