@@ -52,6 +52,16 @@ class NestedMKDict(ClassWrapper):
     def parent(self) -> Optional["NestedMKDict"]:
         return self._parent
 
+    @property
+    def parent_key(self):
+        if not self._parent:
+            return None
+        for key, value in self._parent.items():
+            if isinstance(value, NestedMKDict) and value.object is self.object:
+                return key
+
+        raise RuntimeError("Parent key not identified")
+
     def get_parent(self, level: int=1) -> Optional["NestedMKDict"]:
         if level==0:
             return self
@@ -102,7 +112,7 @@ class NestedMKDict(ClassWrapper):
                 raise KeyError(key) from e
 
         if not isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(f"Invalid value type {type(sub)} for key {key}")
+            raise TypeError(f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .any({key})...")
 
         return self._wrap_(sub, parent=self)
 
@@ -174,7 +184,7 @@ class NestedMKDict(ClassWrapper):
             return sub.get(rest, default)
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(f"Invalid value type {type(sub)} for key {key}")
+            raise TypeError(f"Invalid value type {type(sub)} for key [{key}]. Expect non-mapping. Perhaps, one should use ({key}) or .any({key})...")
 
         return sub
 
@@ -200,7 +210,7 @@ class NestedMKDict(ClassWrapper):
                 raise KeyError(key) from e
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(f"Invalid value type {type(sub)} for key {key}")
+            raise TypeError(f"Invalid value type {type(sub)} for key {key}. Expect non-mapping.")
         return sub
 
     def pop(self, key, *, delete_parents: bool=False):
@@ -438,3 +448,8 @@ class NestedMKDict(ClassWrapper):
 
     __ixor__ = update_missing
 
+def walkitems(obj: NestedMKDict, *args, **kwargs):
+    if isinstance(obj, NestedMKDict):
+        yield from obj.walkitems(*args, **kwargs)
+    else:
+        yield (), obj

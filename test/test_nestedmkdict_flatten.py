@@ -89,16 +89,6 @@ def test_nestedmkdict_flatten_v02():
 
     with raises(KeyError):
         dwf = flatten(dw, ('a1', 'b1', 'c1', 'a2', 'b2', 'c2'))
-    # import IPython; IPython.embed(colors='neutral')
-    # for obj in (dwf,):
-    #     assert obj['root', 'subfolder2', 'st', 'a1', 'b1', 'c1']=='v1'
-    #     assert obj['root', 'subfolder2', 'st', 'b1', 'a1', 'c1']=='v1'
-    #     assert obj['root', 'subfolder2', 'st', 'c1', 'a1', 'b1']=='v1'
-    #     assert obj['root', 'subfolder2', 'st', 'a2', 'b2', 'c2']=='v2'
-    #     assert obj['root', 'subfolder2', 'st', 'b2', 'a2', 'c2']=='v2'
-    #     assert obj['root', 'subfolder2', 'st', 'c2', 'a2', 'b2']=='v2'
-    #     # FlatDict is unable to pass keys
-    #     # assert obj['root', 'subfolder2', 'st', 'd1', 'a2', 'b2']=='extra'
 
 def test_nestedmkdict_flatten_v03():
     dct = {'root': {
