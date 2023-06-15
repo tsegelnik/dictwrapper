@@ -14,7 +14,7 @@ def _select(seq: Sequence, elems_mask: set) -> Tuple[Tuple, Tuple]:
 			break
 	return tuple(rest), tuple(reversed(selected))
 
-def flatten(mkdict, selkeys: Sequence=()) -> NestedMKDict:
+def flatten(mkdict: NestedMKDict, selkeys: Sequence=()) -> NestedMKDict:
 	selkeys_set = set(selkeys)
 	newdict = mkdict._wrap({}, parent=mkdict)
 	newdict._parent = None

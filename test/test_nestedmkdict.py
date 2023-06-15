@@ -1,4 +1,4 @@
-from multikeydict.nestedmkdict import NestedMKDict
+from multikeydict.nestedmkdict import NestedMKDict, walkitems
 import pytest
 from pytest import raises
 
@@ -21,8 +21,8 @@ def test_nestedmkdict_03():
     assert dw.get('a')==1
     assert dw.get('b')==2
     assert dw.get('c')==3
-    assert dw.get('d')==None
-    assert dw.get('d.e')==None
+    assert dw.get('d') is None
+    assert dw.get('d.e') is None
 
     assert tuple(dw.keys())==('a','b','c')
 
@@ -53,6 +53,8 @@ def test_nestedmkdict_04(sep):
         assert isinstance(dw['d'], NestedMKDict)
     with raises(TypeError):
         assert isinstance(dw[('f', 'g')], NestedMKDict)
+    with raises(KeyError):
+        dw('i')
 
 
     #
@@ -115,17 +117,17 @@ def test_nestedmkdict_04(sep):
     # Test contains
     #
     assert 'a' in dw
-    assert not 'a1' in dw
+    assert 'a1' not in dw
     assert 'd' in dw
 
     #
     # Test contains tuple
     #
     assert ('d', 'e') in dw
-    assert not ('k', 'e') in dw
+    assert ('k', 'e') not in dw
     assert ('f', 'g', 'h') in dw
     assert ('f.g.h' in dw) == bool(sep)
-    assert ('z.z.z' in dw) == bool(not sep)
+    assert ('z.z.z' in dw) == (not sep)
 
     #
     # Test parents
@@ -178,7 +180,7 @@ def test_nestedmkdict_06_inheritance():
             return len(tuple(self.walkitems()))
 
         def depth(self):
-            return max([len(k) for k in self.walkkeys()])
+            return max(len(k) for k in self.walkkeys())
 
     dw = NestedMKDictA(dct, sep='.')
     assert dw.count()==7
@@ -192,7 +194,15 @@ def test_nestedmkdict_06_inheritance():
     assert dw('f').depth()==2
 
 def test_nestedmkdict_07_delete():
-    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {'h':5}
+                }
+            }
     dct['z.z.z'] = 0
     dw = NestedMKDict(dct)
 
@@ -208,6 +218,88 @@ def test_nestedmkdict_07_delete():
     del dw._.f.g.h
     assert ('f', 'g', 'h') not in dw
     assert ('f', 'g') in dw
+
+def test_nestedmkdict_07a_delete_with_parents():
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {
+                    'h':5
+                }
+                }
+            }
+    dct['z.z.z'] = 0
+    dw = NestedMKDict(dct)
+
+    assert 'a' in dw
+    dw.delete_with_parents('a')
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    dw.delete_with_parents(('d', 'e'))
+    assert ('d', 'e') not in dw
+    assert ('d') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    dw.delete_with_parents(('f', 'g', 'h'))
+    assert ('f') in dw
+
+def test_nestedmkdict_07b_pop():
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {'h':5}
+                }
+            }
+    dct['z.z.z'] = 0
+    dw = NestedMKDict(dct)
+
+    assert 'a' in dw
+    assert dw.pop('a')==1
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    assert dw.pop(('d', 'e'))==4
+    assert ('d', 'e') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    assert dw.pop(('f', 'g', 'h'))==5
+    assert ('f', 'g', 'h') not in dw
+    assert ('f', 'g') in dw
+
+def test_nestedmkdict_07c_pop():
+    dct = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'd': {'e': 4},
+            'f': {
+                'g': {
+                    'h':5
+                }
+                }
+            }
+    dct['z.z.z'] = 0
+    dw = NestedMKDict(dct)
+
+    assert 'a' in dw
+    assert dw.pop('a', delete_parents=True)==1
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    assert dw.pop(('d', 'e'), delete_parents=True)==4
+    assert ('d', 'e') not in dw
+    assert ('d') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    assert dw.pop(('f', 'g', 'h'), delete_parents=True)==5
+    assert ('f') in dw
 
 def test_nestedmkdict_08_create():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
@@ -292,8 +384,11 @@ def test_nestedmkdict_09_walk():
     dw = NestedMKDict(dct)
 
     keys0 = [ ('a',), ('b', ), ('c',), ('d', 'e'), ('f', 'g', 'h') ]
-    keys = [k for k, v in dw.walkitems()]
-    assert keys==keys0
+    keys1 = [k for k, v in dw.walkitems()]
+    keys2 = [k for k, v in walkitems(dw)]
+    assert keys1==keys0
+    assert keys2==keys0
+    assert next(walkitems(123))==((), 123)
 
     assert [(k,v) for k, v in dw.walkitems('a', appendstartkey=True)] == [(('a',), 1)]
     assert [(k,v) for k, v in dw.walkitems('a', appendstartkey=False)] == [((), 1)]
