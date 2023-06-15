@@ -4,6 +4,7 @@ from .nestedmkdictaccess import NestedMKDictAccess
 from .flatmkdict import FlatMKDict
 
 from typing import Any, Optional, Tuple, Generator, Sequence, Mapping, MutableMapping
+
 class NestedMKDict(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
         The following functionality is implemented:
@@ -16,6 +17,7 @@ class NestedMKDict(ClassWrapper):
     _sep: str
     _parent: Any
     _not_recursive_to_others: bool
+
     def __new__(cls, dic: MutableMapping={}, *args, **kwargs):
         if not isinstance(dic, (MutableMapping, NestedMKDict)):
             return dic
