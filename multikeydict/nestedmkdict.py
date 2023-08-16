@@ -3,7 +3,16 @@ from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 from .flatmkdict import FlatMKDict
 
-from typing import Any, Optional, Tuple, Generator, Sequence, Mapping, MutableMapping
+from typing import (
+    Any,
+    Generator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type
+)
 
 class NestedMKDict(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
@@ -91,7 +100,7 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    def __call__(self, key):
+    def __call__(self, key) -> Type["NestedMKDict"]:
         if key==():
             return self
         head, rest=self.splitkey(key)
