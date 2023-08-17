@@ -235,7 +235,6 @@ class NestedMKDict(ClassWrapper):
             raise TypeError(f"Nested value for '{key}' has wrong type")
 
         ret = sub.pop(rest, delete_parents=delete_parents)
-        print('pop', key, rest, ret, sub)
         if delete_parents and not sub:
             del self._object[key]
         return ret
