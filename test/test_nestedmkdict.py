@@ -229,6 +229,12 @@ def test_nestedmkdict_07a_delete_with_parents():
                 'g': {
                     'h':5
                 }
+                },
+            'i': {
+                'j': {},
+                'k': {
+                    'm': {}
+                    }
                 }
             }
     dct['z.z.z'] = 0
@@ -245,7 +251,13 @@ def test_nestedmkdict_07a_delete_with_parents():
 
     assert ('f', 'g', 'h') in dw
     dw.delete_with_parents(('f', 'g', 'h'))
-    assert ('f') in dw
+    assert ('f', 'g', 'h') not in dw
+    assert ('f', 'g') not in dw
+    assert ('f',) not in dw
+
+    dw.delete_with_parents(('i', 'k', 'm'))
+    assert ('i', 'k', 'm') not in dw
+    assert ('i', 'k') not in dw
 
 def test_nestedmkdict_07b_pop():
     dct = {
@@ -255,6 +267,12 @@ def test_nestedmkdict_07b_pop():
             'd': {'e': 4},
             'f': {
                 'g': {'h':5}
+                },
+            'i': {
+                'j': {},
+                'k': {
+                    'm': {}
+                    }
                 }
             }
     dct['z.z.z'] = 0
@@ -273,6 +291,10 @@ def test_nestedmkdict_07b_pop():
     assert ('f', 'g', 'h') not in dw
     assert ('f', 'g') in dw
 
+    dw.pop(('i', 'k', 'm'))=={}
+    assert ('i', 'k', 'm') not in dw
+    assert ('i', 'k') in dw
+
 def test_nestedmkdict_07c_pop():
     dct = {
             'a': 1,
@@ -283,6 +305,12 @@ def test_nestedmkdict_07c_pop():
                 'g': {
                     'h':5
                 }
+                },
+            'i': {
+                'j': {},
+                'k': {
+                    'm': {}
+                    }
                 }
             }
     dct['z.z.z'] = 0
@@ -299,7 +327,13 @@ def test_nestedmkdict_07c_pop():
 
     assert ('f', 'g', 'h') in dw
     assert dw.pop(('f', 'g', 'h'), delete_parents=True)==5
-    assert ('f') in dw
+    assert ('f', 'g', 'h') not in dw
+    assert ('f', 'g') not in dw
+    assert ('f',) not in dw
+
+    dw.pop(('i', 'k', 'm'), delete_parents=True)=={}
+    assert ('i', 'k', 'm') not in dw
+    assert ('i', 'k') not in dw
 
 def test_nestedmkdict_08_create():
     dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])

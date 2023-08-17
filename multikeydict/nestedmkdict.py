@@ -234,7 +234,8 @@ class NestedMKDict(ClassWrapper):
         if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
             raise TypeError(f"Nested value for '{key}' has wrong type")
 
-        ret = sub.pop(rest)
+        ret = sub.pop(rest, delete_parents=delete_parents)
+        print('pop', key, rest, ret, sub)
         if delete_parents and not sub:
             del self._object[key]
         return ret
