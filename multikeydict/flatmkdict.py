@@ -83,10 +83,10 @@ class FlatMKDict(UserDict):
         It is possible to filter elements by `filterkey` and `filterkeyelem`.
         """
         return FlatMKDict(
-            self.items(
+            self.items( # pyright: ignore reportGeneralTypeIssues
                 *args,
                 filterkey=kwargs.pop("filterkey", None),
                 filterkeyelem=kwargs.pop("filterkeyelem", None),
-            ),  # type: ignore
+            ),
             **kwargs,
         )
