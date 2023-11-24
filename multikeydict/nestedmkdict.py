@@ -2,6 +2,7 @@ from .classwrapper import ClassWrapper
 from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 from .nestedmkdictaccess import NestedMKDictAccess
 from .flatmkdict import FlatMKDict
+from .typing import KeyLike
 
 from typing import (
     Any,
@@ -146,6 +147,16 @@ class NestedMKDict(ClassWrapper):
             return next(it), tuple(it)
         except StopIteration:
             return None, None
+
+    def joinkey(self, key: KeyLike) -> str:
+        if isinstance(key, str):
+            return str
+
+        if isinstance(key, Sequence):
+            return self._sep.join(key)
+
+        raise ValueError(f"Invalid key: {key}")
+
 
     def any(self, key, *, object: bool=False) -> Any:
         if key==():
