@@ -150,7 +150,7 @@ class NestedMKDict(ClassWrapper):
 
     def joinkey(self, key: KeyLike) -> str:
         if isinstance(key, str):
-            return str
+            return key
 
         if isinstance(key, Sequence):
             return self._sep.join(key)
@@ -287,7 +287,7 @@ class NestedMKDict(ClassWrapper):
 
         return sub.setdefault(rest, value)
 
-    def set(self, key, value):
+    def _set(self, key, value):
         key, rest=self.splitkey(key)
 
         if not rest:
@@ -301,10 +301,16 @@ class NestedMKDict(ClassWrapper):
             sub = self._wrap(sub, parent=self)
             # # cfg._set_parent( self )
 
-        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+        if isinstance(sub, NestedMKDict):
+            return sub._set(rest, value)
+
+        if self._not_recursive_to_others:
             raise TypeError(f"Nested value for '{key}' has wrong type")
 
         return sub.__setitem__(rest, value)
+
+    def set(self, key, value):
+        return self._set(key, value)
 
     __setitem__= set
 
