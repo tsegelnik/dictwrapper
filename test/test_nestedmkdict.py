@@ -458,3 +458,25 @@ def test_nestedmkdict_eq_01():
     assert dw("a") != d
     assert dw("a") == dw("a")
     assert dw("a") is not dw("a")
+
+def test_nestedmkdict_keysmap():
+    dct = {
+        "a": 1,
+        "b": 2,
+        "c": 3,
+        "c1": {"i": {"j": {"k": {"l": 6}}}},
+        "d": {"e": 4, "f": 5, "g": 6},
+    }
+    km = {
+            "c1": {"i": {"j": {"k": ("l",)}}},
+            "d": ("e", "f", "g")
+            }
+    dw = NestedMKDict(dct)
+    keysmap = dw.keysmap()
+    assert keysmap==km
+
+    dw2 = NestedMKDict.from_flatdict(dw.walkitems())
+    assert dw2==dw
+
+    dw3 = NestedMKDict.from_flatdict(dict(dw.walkitems()))
+    assert dw3==dw
