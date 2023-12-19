@@ -31,7 +31,6 @@ class FlatMKDict(UserDict):
             )
 
         if self._merge_flatdicts and isinstance(val, FlatMKDict):
-            print('here', key, val)
             for subkey, subval in val.items():
                 newkey = key+subkey
                 self[newkey] = subval

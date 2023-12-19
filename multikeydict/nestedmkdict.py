@@ -361,7 +361,7 @@ class NestedMKDict(ClassWrapper):
             sub = self._wrap(self._object.get(key), parent=self)
 
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(f"Nested value for '{key}' has wrong type")
+                raise TypeError(f"Nested value for '{key}' is not a nested dictionary")
 
             return rest in sub
 
