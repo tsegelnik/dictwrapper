@@ -28,7 +28,7 @@ class NestedMKDict(ClassWrapper):
     """
 
     __slots__ = ("_sep", "_parent", "_types", "_not_recursive_to_others")
-    _sep: str
+    _sep: Optional[str]
     _parent: Any
     _not_recursive_to_others: bool
 
@@ -131,7 +131,7 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    def __call__(self, key) -> Type["NestedMKDict"]:
+    def __call__(self, key) -> "NestedMKDict":
         if key == ():
             return self
         head, rest = self.splitkey(key)
