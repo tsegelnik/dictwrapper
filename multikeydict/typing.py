@@ -8,4 +8,4 @@ def properkey(key: KeyLike) -> Tuple[str,...]:
     if isinstance(key, str):
         return key,
 
-    return key
+    return key # pyright: ignore [reportGeneralTypeIssues]
