@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import UserDict
-from typing import Any, Callable, Generator, Optional, Sequence
+from typing import Any, Callable, Generator, Optional
 class FlatMKDict(UserDict):
     __slots__ = ('_protect', '_merge_flatdicts')
     _protect: bool
@@ -13,10 +13,7 @@ class FlatMKDict(UserDict):
         UserDict.__init__(*args, **kwargs)
 
     def _process_key(self, key: Any) -> tuple:
-        # if isinstance(key, Sequence):
         return tuple(sorted(key))
-        # else:
-        #     return frozenset((key,))
 
     def __getitem__(self, key: Any) -> Any:
         key = self._process_key(key)
@@ -31,7 +28,6 @@ class FlatMKDict(UserDict):
             )
 
         if self._merge_flatdicts and isinstance(val, FlatMKDict):
-            print('here', key, val)
             for subkey, subval in val.items():
                 newkey = key+subkey
                 self[newkey] = subval
