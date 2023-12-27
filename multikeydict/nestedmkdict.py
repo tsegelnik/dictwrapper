@@ -535,3 +535,9 @@ def walkitems(obj: NestedMKDict, *args, **kwargs):
         yield from obj.walkitems(*args, **kwargs)
     else:
         yield (), obj
+
+def walkkeys(obj: NestedMKDict, *args, **kwargs):
+    if isinstance(obj, NestedMKDict):
+        yield from obj.walkkeys(*args, **kwargs)
+    else:
+        yield ()
