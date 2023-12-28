@@ -6,7 +6,7 @@ from .typing import KeyLike, TupleKey, properkey
 
 
 def match_keys(
-    keys_left_seq: Sequence[Iterable[KeyLike]],
+    keys_left_seq: Sequence[Sequence[KeyLike]],
     keys_right: Iterable[KeyLike],
     fcn: Callable[[int, TupleKey, TupleKey], Any],
     *,
