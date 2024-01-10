@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence, Union
 
 from orderedset import OrderedSet
 
@@ -10,8 +10,8 @@ def match_keys(
     keys_right: Iterable[KeyLike],
     fcn: Callable[[int, TupleKey, TupleKey], Any],
     *,
-    fcn_outer_before: Callable[[TupleKey], Any] | None = None,
-    fcn_outer_after: Callable[[TupleKey], Any] | None = None
+    fcn_outer_before: Union[Callable[[TupleKey], Any], None] = None,
+    fcn_outer_after: Union[Callable[[TupleKey], Any], None] = None
 ) -> None:
     for key_right in keys_right:
         key_right_proper = properkey(key_right)

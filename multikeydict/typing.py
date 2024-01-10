@@ -6,7 +6,7 @@ Key = Union[str, Tuple[str, ...]]
 KeyLike = Union[str, Sequence[str]]
 
 
-def properkey(key: KeyLike, sep: str | bool | None = None) -> Tuple[str, ...]:
+def properkey(key: KeyLike, sep: Union[str, bool, None] = None) -> Tuple[str, ...]:
     if isinstance(key, str):
         if isinstance(sep, str):
             return tuple(key.split(sep))
@@ -20,7 +20,7 @@ def properkey(key: KeyLike, sep: str | bool | None = None) -> Tuple[str, ...]:
     return tuple(key)
 
 
-def setkey(key: KeyLike) -> OrderedSet[str]:
+def setkey(key: KeyLike) -> OrderedSet:
     if isinstance(key, str):
         return OrderedSet((key,))
 
