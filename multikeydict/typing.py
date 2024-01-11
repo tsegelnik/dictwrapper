@@ -14,7 +14,7 @@ def properkey(key: KeyLike, sep: Union[str, bool, None] = None) -> Tuple[str, ..
             return tuple(key.split("."))
 
         return (key,)
-    if isinstance(key, Tuple):
+    if isinstance(key, tuple):
         return key
 
     return tuple(key)
