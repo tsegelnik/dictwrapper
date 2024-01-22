@@ -32,7 +32,14 @@ def test_match():
     match_keys((left, right), right, print)
     print()
 
+    print('left bad, right bad')
+    match_keys((left_bad,), right_bad, print)
+
+    print('left bad, right bad')
+    match_keys((left,), right_bad, print)
+
     with raises(ValueError):
-        match_keys((left_bad,), right_bad, print)
+        match_keys((left_bad,), right_bad, print, ensure_left_keys_processed=True)
+
     with raises(ValueError):
-        match_keys((left,), right_bad, print)
+        match_keys((left,), right_bad, print, ensure_right_keys_processed=True)

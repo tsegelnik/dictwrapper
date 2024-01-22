@@ -54,7 +54,7 @@ def match_keys(
             skipped_right_keys.append(key_right_proper)
 
     if ensure_left_keys_processed and skipped_left_keys:
-        raise Exception(f"match_keys: there were unprocessed left keys {skipped_left_keys!s}")
+        raise ValueError(f"match_keys: there were unprocessed left keys {skipped_left_keys!s}")
 
     if ensure_right_keys_processed and skipped_right_keys:
-        raise Exception(f"match_keys: there were unprocessed right keys {skipped_right_keys!s}")
+        raise ValueError(f"match_keys: there were unprocessed right keys {skipped_right_keys!s}")
