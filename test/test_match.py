@@ -10,11 +10,11 @@ def test_match():
     i2 = ("A", "B", "C")
     i3 = ("x", "y", "z")
 
-    left = tuple((a, b) for a, b in product(i1, i2))
-    right = tuple((a,) for a, in i2)
+    right = tuple((a, b) for a, b in product(i1, i2))
+    left  = tuple((a,) for a, in i2)
 
-    left_bad = tuple((a, b) for a, b in product(i1, i2))
-    right_bad = tuple((a, b) for a, b in product(i1, i3))
+    right_extra = tuple((a, b) for a, b in product(i1, i2))
+    left_extra  = tuple((a, b) for a, b in product(i1, i3))
 
     print('left, right')
     match_keys((left,), right, print)
@@ -32,26 +32,26 @@ def test_match():
     match_keys((left, right), right, print)
     print()
 
-    print('left bad, right bad')
+    print('left extra, right extra')
     match_keys(
-        (left_bad,),
-        right_bad,
+        (left_extra,),
+        right_extra,
         print,
         require_all_left_keys_processed=False,
         require_all_right_keys_processed=False,
     )
+    print()
 
-    print('left bad, right bad')
+    print('left, right extra')
     match_keys(
         (left,),
-        right_bad,
+        right_extra,
         print,
         require_all_left_keys_processed=False,
         require_all_right_keys_processed=False
     )
+    print()
 
     with raises(ValueError):
-        match_keys((left_bad,), right_bad, print)
+        match_keys((left_extra,), right_extra, print)
 
-    with raises(ValueError):
-        match_keys((left,), right_bad, print)
