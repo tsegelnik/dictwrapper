@@ -12,8 +12,8 @@ def match_keys(
     *,
     fcn_outer_before: Union[Callable[[TupleKey], Any], None] = None,
     fcn_outer_after: Union[Callable[[TupleKey], Any], None] = None,
-    ensure_right_keys_processed: bool = False,
-    ensure_left_keys_processed: bool = False,
+    require_all_right_keys_processed: bool = True,
+    require_all_left_keys_processed: bool = True,
 ) -> None:
     processed_left_keys = set()
     skipped_left_keys = set()
@@ -31,7 +31,7 @@ def match_keys(
                     key_left_proper = properkey(key_left)
                     setkey_left = OrderedSet(key_left_proper)
                     if not setkey_right.issubset(setkey_left):
-                        if ensure_left_keys_processed and key_left_proper not in processed_left_keys:
+                        if require_all_left_keys_processed and key_left_proper not in processed_left_keys:
                             skipped_left_keys.add(key_left_proper)
                         continue
                 else:
@@ -40,7 +40,7 @@ def match_keys(
                 fcn(i_left, key_left_proper, key_right_proper)
                 right_processed = True
 
-                if ensure_left_keys_processed:
+                if require_all_left_keys_processed:
                     try:
                         skipped_left_keys.remove(key_left_proper)
                     except KeyError:
@@ -53,8 +53,8 @@ def match_keys(
         if not right_processed:
             skipped_right_keys.append(key_right_proper)
 
-    if ensure_left_keys_processed and skipped_left_keys:
+    if require_all_left_keys_processed and skipped_left_keys:
         raise ValueError(f"match_keys: there were unprocessed left keys {skipped_left_keys!s}")
 
-    if ensure_right_keys_processed and skipped_right_keys:
+    if require_all_right_keys_processed and skipped_right_keys:
         raise ValueError(f"match_keys: there were unprocessed right keys {skipped_right_keys!s}")
