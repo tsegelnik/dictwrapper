@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from contextlib import suppress
-from typing import Any, Callable, Iterable, Sequence, Union
+from typing import Any, Callable, Iterable, Union
 
 from orderedset import OrderedSet
 

@@ -1,7 +1,8 @@
+from collections.abc import Sequence
+from typing import Tuple
+
 from .nestedmkdict import NestedMKDict
 from .flatmkdict import FlatMKDict
-
-from typing import Sequence, Tuple
 
 def _select(seq: Sequence, elems_mask: set) -> Tuple[Tuple, Tuple]:
 	selected = []

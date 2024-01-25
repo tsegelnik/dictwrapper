@@ -1,5 +1,6 @@
-from typing import Sequence, Tuple, Union
+from collections.abc import Sequence
 from orderedset import OrderedSet
+from typing import Tuple, Union
 
 TupleKey = Tuple[str, ...]
 Key = Union[str, Tuple[str, ...]]
