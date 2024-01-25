@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import Any, Callable, Iterable, Sequence, Union
 
 from orderedset import OrderedSet
@@ -21,14 +22,20 @@ def match_keys(
         raise RuntimeError("Left sequence is empty")
 
     if left_in_right and right_in_left:
+
         def keys_consistent(left: set, right: set) -> bool:
             return left.issubset(right) or right.issubset(left)
+
     elif left_in_right:
+
         def keys_consistent(left: set, right: set) -> bool:
             return left.issubset(right)
+
     elif right_in_left:
-        def keys_consistent(left: set, right: set) -> bool: # pyright: ignore [reportGeneralTypeIssues]
-           right.issubset(left)
+
+        def keys_consistent(left: set, right: set) -> bool:
+            return right.issubset(left)
+
     else:
         raise RuntimeError("Either right_in_left or left_in_right should be True")
 
@@ -61,10 +68,8 @@ def match_keys(
                 right_processed = True
 
                 if require_all_left_keys_processed:
-                    try:
+                    with suppress(KeyError):
                         skipped_left_keys.remove(key_left_proper)
-                    except KeyError:
-                        pass
                     processed_left_keys.add(key_left_proper)
 
         if fcn_outer_after is not None:
