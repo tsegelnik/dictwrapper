@@ -7,7 +7,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Union
+    Union,
 )
 
 from .classwrapper import ClassWrapper
@@ -143,7 +143,9 @@ class NestedMKDict(ClassWrapper):
         if rest:
             sub = self._wrap(sub, parent=self)
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(f"Nested value for '{key}' has wrong type")
+                raise TypeError(
+                    f"Expect nested dictionary as value for {key}, got {type(sub).__name__}"
+                )
 
             try:
                 return sub(rest)
@@ -206,7 +208,7 @@ class NestedMKDict(ClassWrapper):
 
         sub = self._wrap(sub, parent=self)
         if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-            raise TypeError(f"Nested value for '{key}' has wrong type")
+            raise TypeError(f"Nested value for {key} has wrong type")
 
         try:
             return sub.any(rest, object=object)
@@ -229,7 +231,9 @@ class NestedMKDict(ClassWrapper):
         if rest:
             sub = self._wrap(sub, parent=self)
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(f"Nested value for '{key}' has wrong type")
+                raise TypeError(
+                    f"Expect non-mapping as value for {key}, got {type(sub).__name__}"
+                )
 
             return sub.get(rest, default)
 
@@ -254,7 +258,9 @@ class NestedMKDict(ClassWrapper):
         if rest:
             sub = self._wrap(sub, parent=self)
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(f"Nested value for '{key}' has wrong type")
+                raise TypeError(
+                    f"Expect non-mapping as value for {key}, got {type(sub).__name__}"
+                )
 
             try:
                 return sub[rest]
@@ -277,7 +283,7 @@ class NestedMKDict(ClassWrapper):
             return self._object.pop(key)
 
         if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-            raise TypeError(f"Nested value for '{key}' has wrong type")
+            raise TypeError(f"Nested value for {key} has wrong type")
 
         ret = sub.pop(rest, delete_parents=delete_parents)
         if delete_parents and not sub:
@@ -298,7 +304,7 @@ class NestedMKDict(ClassWrapper):
             return
 
         if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-            raise TypeError(f"Nested value for '{key}' has wrong type")
+            raise TypeError(f"Nested value for {key} has wrong type")
 
         del sub[rest]
 
@@ -317,7 +323,7 @@ class NestedMKDict(ClassWrapper):
             # # cfg._set_parent( self )
 
         if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-            raise TypeError(f"Nested value for '{key}' has wrong type")
+            raise TypeError(f"Nested value for {key} has wrong type")
 
         return sub.setdefault(rest, value)
 
@@ -339,7 +345,7 @@ class NestedMKDict(ClassWrapper):
             return sub._set(rest, value)
 
         if self._not_recursive_to_others:
-            raise TypeError(f"Nested value for '{key}' has wrong type")
+            raise TypeError(f"Nested value for {key} has wrong type")
 
         return sub.__setitem__(rest, value)
 
@@ -360,7 +366,7 @@ class NestedMKDict(ClassWrapper):
             sub = self._wrap(self._object.get(key), parent=self)
 
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(f"Nested value for '{key}' is not a nested dictionary")
+                raise TypeError(f"Nested value for {key} is not a nested dictionary")
 
             return rest in sub
 
@@ -534,6 +540,7 @@ def walkitems(obj: NestedMKDict, *args, **kwargs):
         yield from obj.walkitems(*args, **kwargs)
     else:
         yield (), obj
+
 
 def walkkeys(obj: NestedMKDict, *args, **kwargs):
     if isinstance(obj, NestedMKDict):
