@@ -1,17 +1,17 @@
 from collections.abc import Sequence
+
 from orderedset import OrderedSet
-from typing import Tuple, Union
 
-TupleKey = Tuple[str, ...]
-Key = Union[str, Tuple[str, ...]]
-KeyLike = Union[str, Sequence[str]]
+TupleKey = tuple[str, ...]
+Key = str | tuple[str, ...]
+KeyLike = str | Sequence[str]
 
 
-def properkey(key: KeyLike, sep: Union[str, bool, None] = None) -> Tuple[str, ...]:
+def properkey(key: KeyLike, sep: str | bool | None = None) -> tuple[str, ...]:
     if isinstance(key, str):
         if isinstance(sep, str):
             return tuple(key.split(sep))
-        elif sep==True:
+        elif sep == True:
             return tuple(key.split("."))
 
         return (key,)
@@ -26,3 +26,10 @@ def setkey(key: KeyLike) -> OrderedSet:
         return OrderedSet((key,))
 
     return OrderedSet(key)
+
+
+def strkey(key: KeyLike, sep=".") -> str:
+    if isinstance(key, str):
+        return key
+
+    return sep.join(key)
