@@ -75,4 +75,3 @@ def test_merge():
     assert fd['a', 'b', 'c2'] == 2
     fd['a', 'b', 'c4', 'd', 'e', 'f'] = 3
     fd['a', 'b', 'c4', 'd', 'e', 'g'] = 4
-

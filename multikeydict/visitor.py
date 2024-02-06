@@ -1,4 +1,4 @@
-class NestedMKDictVisitor(object):
+class NestedMKDictVisitor:
     def start(self, dct):
         pass
 
@@ -56,4 +56,3 @@ class NestedMKDictVisitorDemostrator(NestedMKDictVisitor):
         if depth is None:
             depth = len(k)
         print(self.fmt.format(action=action, depth=depth, key=k, vtype=vtype, value=v, **self.opts))
-

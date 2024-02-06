@@ -1,5 +1,5 @@
-from multikeydict.nestedmkdict import NestedMKDict
 from multikeydict.flatmkdict import FlatMKDict
+from multikeydict.nestedmkdict import NestedMKDict
 from pytest import raises
 
 def test_nestedmkdict_flatmkdict():
@@ -96,4 +96,3 @@ def test_nestedmkdict_flatmkdict():
     # Walks
     for k, v in dw.walkitems():
         print(k, v)
-

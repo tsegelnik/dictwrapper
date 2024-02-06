@@ -1,8 +1,9 @@
-from multikeydict.nestedmkdict import NestedMKDict
-from multikeydict.flatten import flatten, _select
-from pytest import raises
-
 from pprint import pprint
+
+from multikeydict.flatten import _select
+from multikeydict.flatten import flatten
+from multikeydict.nestedmkdict import NestedMKDict
+from pytest import raises
 
 def test__select():
     a, b = _select(tuple('abcd'), set('cd'))
@@ -128,4 +129,3 @@ def test_nestedmkdict_flatten_v03():
         assert obj['root', 'subfolder2', 'st', 'b2', 'a2', 'c2']=='v2'
         assert obj['root', 'subfolder2', 'st', 'c2', 'a2', 'b2']=='v2'
         assert obj['root', 'subfolder2', 'st', 'd1', 'a2', 'b2']=='extra'
-

@@ -1,8 +1,7 @@
 from itertools import product
 
-from pytest import raises
-
 from multikeydict.match import match_keys
+from pytest import raises
 
 
 def test_match():
@@ -54,4 +53,3 @@ def test_match():
 
     with raises(ValueError):
         match_keys((left_extra,), right_extra, print)
-

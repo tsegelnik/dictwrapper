@@ -1,5 +1,4 @@
 from multikeydict.nestedmkdict import NestedMKDict
-
 from pytest import raises
 
 def test_nestedmkdict_update_01():

@@ -14,7 +14,7 @@ def test_nestedmkdict_04_visitor():
     assert keys==keys0
     assert values==values0
 
-    class Visitor(object):
+    class Visitor:
         keys, values = (), ()
         def __call__(self, k, v):
             self.keys+=k,

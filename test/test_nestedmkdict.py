@@ -1,7 +1,7 @@
 import pytest
+from multikeydict.nestedmkdict import NestedMKDict
+from multikeydict.nestedmkdict import walkitems
 from pytest import raises
-
-from multikeydict.nestedmkdict import NestedMKDict, walkitems
 
 
 def test_nestedmkdict_01():

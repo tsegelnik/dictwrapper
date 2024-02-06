@@ -1,4 +1,4 @@
-class NestedMKDictAccess(object):
+class NestedMKDictAccess:
     '''NestedMKDict wrapper. Enables attribute based access to nested dictionaries'''
     _ = None
     def __init__(self, dct):
