@@ -2,3 +2,4 @@ orderedset
 pytest
 pytest-cov
 coverage
+cython
