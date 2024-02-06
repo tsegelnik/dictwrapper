@@ -1,6 +1,7 @@
-from typing import Any, List
+from typing import Any
 
-class ClassWrapper(object):
+
+class ClassWrapper:
     __slots__ = ('_object', '_types', '_wrapper_class')
     _object: Any
     _types: Any
@@ -20,7 +21,7 @@ class ClassWrapper(object):
     def __repr__(self) -> str:
         return repr(self._object)
 
-    def __dir__(self) -> List[str]:
+    def __dir__(self) -> list[str]:
         return dir(self._object)
 
     def __len__(self) -> int:

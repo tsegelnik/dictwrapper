@@ -1,14 +1,5 @@
-from typing import (
-    Any,
-    Generator,
-    Iterable,
-    Mapping,
-    MutableMapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-)
+from collections.abc import Generator, Iterable, Mapping, MutableMapping, Sequence
+from typing import Any, Optional
 
 from .classwrapper import ClassWrapper
 from .flatmkdict import FlatMKDict
@@ -27,7 +18,7 @@ class NestedMKDict(ClassWrapper):
     """
 
     __slots__ = ("_sep", "_parent", "_types", "_not_recursive_to_others")
-    _sep: Optional[str]
+    _sep: str | None
     _parent: Any
     _not_recursive_to_others: bool
 
@@ -38,10 +29,10 @@ class NestedMKDict(ClassWrapper):
 
     def __init__(
         self,
-        dic: Optional[MutableMapping] = None,
+        dic: MutableMapping | None = None,
         *,
-        sep: Optional[str] = None,
-        parent: Optional[Any] = None,
+        sep: str | None = None,
+        parent: Any | None = None,
         recursive_to_others: bool = False,
     ):
         if dic is None:
@@ -69,7 +60,7 @@ class NestedMKDict(ClassWrapper):
     @classmethod
     def from_flatdict(
         cls,
-        dct: Union[Mapping[KeyLike, Any], Iterable[Tuple[KeyLike, Any]]],
+        dct: Mapping[KeyLike, Any] | Iterable[tuple[KeyLike, Any]],
         *args,
         **kwargs,
     ) -> "NestedMKDict":
@@ -462,7 +453,7 @@ class NestedMKDict(ClassWrapper):
             yield k
 
     def walkjoinedkeys(
-        self, *args, sep: Optional[str] = None, **kwargs
+        self, *args, sep: str | None = None, **kwargs
     ) -> Generator[str, None, None]:
         if sep is None:
             sep = self._sep
@@ -472,8 +463,8 @@ class NestedMKDict(ClassWrapper):
             yield sep.join(k)
 
     def walkjoineditems(
-        self, *args, sep: Optional[str] = None, **kwargs
-    ) -> Generator[Tuple[str, Any], None, None]:
+        self, *args, sep: str | None = None, **kwargs
+    ) -> Generator[tuple[str, Any], None, None]:
         if sep is None:
             sep = self._sep
         if sep is None:
