@@ -1,10 +1,10 @@
 from collections.abc import Sequence
-from typing import Tuple
 
-from .nestedmkdict import NestedMKDict
 from .flatmkdict import FlatMKDict
+from .nestedmkdict import NestedMKDict
 
-def _select(seq: Sequence, elems_mask: set) -> Tuple[Tuple, Tuple]:
+
+def _select(seq: Sequence, elems_mask: set) -> tuple[tuple, tuple]:
 	selected = []
 	rest = ()
 	for i, el in enumerate(reversed(seq), 0):

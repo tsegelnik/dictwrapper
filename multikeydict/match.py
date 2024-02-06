@@ -1,6 +1,6 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Iterable, Sequence
 from contextlib import suppress
-from typing import Any, Callable, Iterable, Union
+from typing import Any
 
 from orderedset import OrderedSet
 
@@ -12,8 +12,8 @@ def match_keys(
     keys_right: Iterable[KeyLike],
     fcn: Callable[[int, TupleKey, TupleKey], Any],
     *,
-    fcn_outer_before: Union[Callable[[TupleKey], Any], None] = None,
-    fcn_outer_after: Union[Callable[[TupleKey], Any], None] = None,
+    fcn_outer_before: Callable[[TupleKey], Any] | None = None,
+    fcn_outer_after: Callable[[TupleKey], Any] | None = None,
     left_in_right: bool = True,
     right_in_left: bool = True,
     require_all_right_keys_processed: bool = True,

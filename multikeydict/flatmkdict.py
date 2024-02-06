@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from collections import UserDict
-from typing import Any, Callable, Generator, Optional
+from collections.abc import Callable, Generator
+from typing import Any
+
+
 class FlatMKDict(UserDict):
     __slots__ = ('_protect', '_merge_flatdicts')
     _protect: bool
@@ -51,8 +54,8 @@ class FlatMKDict(UserDict):
     def items(
         self,
         *args,
-        filterkey: Optional[Callable[[Any], bool]] = None,
-        filterkeyelem: Optional[Callable[[Any], bool]] = None,
+        filterkey: Callable[[Any], bool] | None = None,
+        filterkeyelem: Callable[[Any], bool] | None = None,
     ) -> Generator:
         """
         Returns items from the slice by `args`.
