@@ -11,7 +11,7 @@ def properkey(key: KeyLike, sep: str | bool | None = None) -> tuple[str, ...]:
     if isinstance(key, str):
         if isinstance(sep, str):
             return tuple(key.split(sep))
-        elif sep == True:
+        elif sep is True:
             return tuple(key.split("."))
 
         return (key,)
