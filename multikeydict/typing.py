@@ -21,14 +21,14 @@ def properkey(key: KeyLike, sep: str | bool | None = None) -> tuple[str, ...]:
     return tuple(key)
 
 
-def setkey(key: KeyLike) -> OrderedSet[str]:
+def orderedsetkey(key: KeyLike) -> OrderedSet[str]:
     if isinstance(key, str):
         return OrderedSet((key,))
 
     return OrderedSet(key)
 
 
-def usetkey(key: KeyLike) -> set[str]:
+def setkey(key: KeyLike) -> set[str]:
     if isinstance(key, str):
         return set((key,))
 
