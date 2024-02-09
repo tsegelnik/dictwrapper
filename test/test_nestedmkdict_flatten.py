@@ -1,7 +1,7 @@
 from pprint import pprint
 
-from multikeydict.flatten import _select
-from multikeydict.flatten import flatten
+from multikeydict.tools.flatten import _select
+from multikeydict.tools.flatten import flatten
 from multikeydict.nestedmkdict import NestedMKDict
 from pytest import raises
 

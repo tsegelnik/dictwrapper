@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .typing import setkey
+from ..typing import setkey
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
     from typing import Any
 
-    from .nestedmkdict import NestedMKDict
-    from .typing import KeyLike
+    from ..nestedmkdict import NestedMKDict
+    from ..typing import KeyLike
 
 
 def remap_items(
