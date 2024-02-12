@@ -17,13 +17,13 @@ def remap_items(
     target: NestedMKDict,
     *,
     indices: Mapping[str, Sequence[str]] | None = None,
-    skip_indices: Sequence[KeyLike] | None = None,
+    skip_indices: Sequence[KeyLike | set[str]] | None = None,
     fcn: Callable[[Any], Any] = lambda o: o,
 ) -> None:
     from itertools import product
 
     if skip_indices is not None:
-        skip_sets = tuple(setkey(sq) for sq in skip_indices)
+        skip_sets = tuple(sq if isinstance(sq, set) else setkey(sq) for sq in skip_indices)
         skip = lambda key: any(ss.issubset(key) for ss in skip_sets)
     else:
         skip = lambda _: False
