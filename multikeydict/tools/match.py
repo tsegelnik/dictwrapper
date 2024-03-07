@@ -1,10 +1,14 @@
-from collections.abc import Callable, Iterable, Sequence
+from __future__ import annotations
+
 from contextlib import suppress
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from orderedset import OrderedSet
 
 from ..typing import KeyLike, TupleKey, properkey
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Sequence
 
 
 def match_keys(
