@@ -1,6 +1,6 @@
 from itertools import product
 
-from multikeydict.match import match_keys
+from multikeydict.tools import match_keys
 from pytest import raises
 
 

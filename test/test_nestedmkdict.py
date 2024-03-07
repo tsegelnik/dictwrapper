@@ -176,6 +176,31 @@ def test_nestedmkdict_04(sep):
     assert dw._._ is dw
 
 
+@pytest.mark.parametrize("sep", [None, "."])
+def test_nestedmkdict_04_del(sep):
+    dct = dict(a=1, b=2, c=3, d=dict(e=4), f=dict(g=dict(h=5)))
+    dw = NestedMKDict(dct, sep=sep)
+
+    if sep is not None:
+        del dw["d.e"]
+    else:
+        del dw[("d", "e")]
+
+    assert ("d", "e") not in dw
+    assert ("d") in dw
+
+    if sep is not None:
+        del dw["f.g"]
+    else:
+        del dw[("f", "g")]
+
+    assert ("f", "g", "h") not in dw
+    assert ("f", "g") not in dw
+    assert ("f") in dw
+
+    with raises(KeyError):
+        del dw["f.g"]
+
 def test_nestedmkdict_06_inheritance():
     dct = dict(
         [("a", 1), ("b", 2), ("c", 3), ("d", dict(e=4)), ("f", dict(g=dict(h=5, i=6)))]

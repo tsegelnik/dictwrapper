@@ -4,7 +4,7 @@ from typing import Any
 
 from orderedset import OrderedSet
 
-from .typing import KeyLike, TupleKey, properkey
+from ..typing import KeyLike, TupleKey, properkey
 
 
 def match_keys(

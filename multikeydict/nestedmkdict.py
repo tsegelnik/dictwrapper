@@ -336,7 +336,7 @@ class NestedMKDict(ClassWrapper):
             return sub._set(rest, value)
 
         if self._not_recursive_to_others:
-            raise TypeError(f"Nested value for {key} has wrong type")
+            raise TypeError(f"Nested value for {key} (sub: {rest}) has wrong type")
 
         return sub.__setitem__(rest, value)
 
@@ -344,6 +344,27 @@ class NestedMKDict(ClassWrapper):
         return self._set(key, value)
 
     __setitem__ = set
+
+    def __delitem__(self, key):
+        key, rest = self.splitkey(key)
+
+        if not rest:
+            del self._object[key]
+            return
+
+        if not key in self:
+            raise KeyError(key)
+
+        sub = self._wrap(self._object.get(key), parent=self)
+        if isinstance(sub, NestedMKDict):
+            del sub[rest]
+            return
+
+        if self._not_recursive_to_others:
+            raise TypeError(f"Nested value for {key} (sub: {rest}) has wrong type")
+
+        sub.__delitem__(rest)
+
 
     def __contains__(self, key):
         if key == ():

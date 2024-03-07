@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
-from .flatmkdict import FlatMKDict
-from .nestedmkdict import NestedMKDict
+from ..flatmkdict import FlatMKDict
+from ..nestedmkdict import NestedMKDict
 
 
 def _select(seq: Sequence, elems_mask: set) -> tuple[tuple, tuple]:
