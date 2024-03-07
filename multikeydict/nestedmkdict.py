@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Generator, Iterable, Mapping, MutableMapping, Sequence
-from typing import Any, Optional
+from typing import Any
 
 from .classwrapper import ClassWrapper
 from .flatmkdict import FlatMKDict
@@ -79,7 +81,7 @@ class NestedMKDict(ClassWrapper):
         return NestedMKDictAccess(self)
 
     @property
-    def parent(self) -> Optional["NestedMKDict"]:
+    def parent(self) -> NestedMKDict | None:
         return self._parent
 
     @property
@@ -92,7 +94,7 @@ class NestedMKDict(ClassWrapper):
 
         raise RuntimeError("Parent key not identified")
 
-    def get_parent(self, level: int = 1) -> Optional["NestedMKDict"]:
+    def get_parent(self, level: int = 1) -> NestedMKDict | None:
         if level == 0:
             return self
         elif level < 0:
@@ -352,7 +354,7 @@ class NestedMKDict(ClassWrapper):
             del self._object[key]
             return
 
-        if not key in self:
+        if key not in self:
             raise KeyError(key)
 
         sub = self._wrap(self._object.get(key), parent=self)
@@ -364,7 +366,6 @@ class NestedMKDict(ClassWrapper):
             raise TypeError(f"Nested value for {key} (sub: {rest}) has wrong type")
 
         sub.__delitem__(rest)
-
 
     def __contains__(self, key):
         if key == ():
