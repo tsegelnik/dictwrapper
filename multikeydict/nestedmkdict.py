@@ -470,6 +470,13 @@ class NestedMKDict(ClassWrapper):
             {k: tuple(dct.keys()) for k, dct in self.walkdicts()}
         )
 
+    def unique_key_parts(self) -> set[str]:
+        """Return a set with all the unique set parts"""
+        ret = set()
+        for key in self.walkkeys():
+            ret.update(key)
+        return ret
+
     def walkkeys(self, *args, **kwargs):
         for k, _ in self.walkitems(*args, **kwargs):
             yield k
