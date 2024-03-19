@@ -23,6 +23,8 @@ def match_keys(
     require_all_right_keys_processed: bool = True,
     require_all_left_keys_processed: bool = True,
 ) -> None:
+    if isinstance(keys_right, str):
+        raise RuntimeError("`keys_right` should be iterable, but not string")
     if not keys_left_seq:
         raise RuntimeError("Left sequence is empty")
 
