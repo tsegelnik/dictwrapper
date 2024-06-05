@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from orderedset import OrderedSet
 
-from ..typing import KeyLike, TupleKey, properkey
+from ..typing import Key, KeyLike, TupleKey, properkey, setkey
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -22,6 +22,7 @@ def match_keys(
     right_in_left: bool = True,
     require_all_right_keys_processed: bool = True,
     require_all_left_keys_processed: bool = True,
+    skippable_left_keys_should_contain: Sequence[KeyLike] | None = None,
 ) -> None:
     if isinstance(keys_right, str):
         raise RuntimeError("`keys_right` should be iterable, but not string")
@@ -49,6 +50,9 @@ def match_keys(
     skipped_right_keys = []
     processed_left_keys = set()
     skipped_left_keys = set()
+
+    collect_skipped_left_keys = require_all_left_keys_processed or skippable_left_keys_should_contain
+
     for key_right in keys_right:
         key_right_proper = properkey(key_right)
         setkey_right = OrderedSet(key_right_proper)
@@ -63,7 +67,7 @@ def match_keys(
                     setkey_left = OrderedSet(key_left_proper)
                     if not keys_consistent(setkey_left, setkey_right):
                         if (
-                            require_all_left_keys_processed
+                            collect_skipped_left_keys
                             and key_left_proper not in processed_left_keys
                         ):
                             skipped_left_keys.add(key_left_proper)
@@ -74,7 +78,7 @@ def match_keys(
                 fcn(i_left, key_left_proper, key_right_proper)
                 right_processed = True
 
-                if require_all_left_keys_processed:
+                if collect_skipped_left_keys:
                     with suppress(KeyError):
                         skipped_left_keys.remove(key_left_proper)
                     processed_left_keys.add(key_left_proper)
@@ -85,12 +89,33 @@ def match_keys(
         if not right_processed:
             skipped_right_keys.append(key_right_proper)
 
-    if require_all_left_keys_processed and skipped_left_keys:
-        raise ValueError(
-            f"match_keys: there were unprocessed left keys {skipped_left_keys!s}"
-        )
+    if skipped_left_keys:
+        if require_all_left_keys_processed:
+            raise ValueError(
+                f"match_keys: there were unprocessed left keys {skipped_left_keys!s}"
+            )
+        if _check_skipped_keys_incorrect(
+            skipped_left_keys, skippable_left_keys_should_contain
+        ):
+            raise ValueError(
+                f"match_keys: there were unprocessed left keys {skipped_left_keys!s}"
+            )
 
     if require_all_right_keys_processed and skipped_right_keys:
         raise ValueError(
             f"match_keys: there were unprocessed right keys {skipped_right_keys!s}"
         )
+
+
+def _check_skipped_keys_incorrect(
+    skipped_keys: Sequence[Key] | set[Key], should_contain: Sequence[KeyLike] | None
+) -> bool:
+    if not should_contain:
+        return False
+
+    setkeys = tuple(setkey(keypart) for keypart in should_contain)
+    for skipped_key in skipped_keys:
+        if not any(setkey.issubset(skipped_key) for setkey in setkeys):
+            return True
+
+    return False
