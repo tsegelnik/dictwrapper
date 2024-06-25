@@ -65,7 +65,7 @@ class NestedMKDict(ClassWrapper):
         dct: Mapping[KeyLike, Any] | Iterable[tuple[KeyLike, Any]],
         *args,
         **kwargs,
-    ) -> "NestedMKDict":
+    ) -> NestedMKDict:
         """Make a nested dictionary from a flat dictionary"""
         ret = NestedMKDict({}, *args, **kwargs)
         if isinstance(dct, Mapping):
@@ -123,7 +123,7 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    def __call__(self, key) -> "NestedMKDict":
+    def __call__(self, key) -> NestedMKDict:
         if key == ():
             return self
         head, rest = self.splitkey(key)
@@ -381,7 +381,7 @@ class NestedMKDict(ClassWrapper):
         for v in self._object.values():
             yield self._wrap(v, parent=self)
 
-    def copy(self) -> "NestedMKDict":
+    def copy(self) -> NestedMKDict:
         return NestedMKDict(
             self.object.copy(),
             parent=self._parent,
@@ -389,7 +389,7 @@ class NestedMKDict(ClassWrapper):
             recursive_to_others=not self._not_recursive_to_others,
         )
 
-    def deepcopy(self) -> "NestedMKDict":
+    def deepcopy(self) -> NestedMKDict:
         new = NestedMKDict(
             self._types(),
             parent=self._parent,
@@ -452,7 +452,7 @@ class NestedMKDict(ClassWrapper):
         if yieldself:
             yield (), self
 
-    def keysmap(self) -> "NestedMKDict":
+    def keysmap(self) -> NestedMKDict:
         """Return a nested dictionary instance with similar structure, but dictionaries are replaced with tuples of their keys"""
         return NestedMKDict.from_flatdict(
             {k: tuple(dct.keys()) for k, dct in self.walkdicts()}
@@ -519,7 +519,7 @@ class NestedMKDict(ClassWrapper):
 
         return visitor
 
-    def update(self, other) -> "NestedMKDict":
+    def update(self, other) -> NestedMKDict:
         other = self._wrap(other)
         for k, v in other.walkitems():
             self[k] = v
@@ -527,7 +527,7 @@ class NestedMKDict(ClassWrapper):
 
     __ior__ = update
 
-    def update_missing(self, other) -> "NestedMKDict":
+    def update_missing(self, other) -> NestedMKDict:
         other = self._wrap(other)
         for k, v in other.walkitems():
             try:
