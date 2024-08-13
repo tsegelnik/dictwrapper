@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Generator, Iterable, Mapping, MutableMapping, Sequence
 from typing import Any
 
+from .ipython import repr_pretty
 from .classwrapper import ClassWrapper
 from .flatmkdict import FlatMKDict
 from .nestedmkdictaccess import NestedMKDictAccess
@@ -58,6 +59,14 @@ class NestedMKDict(ClassWrapper):
             self._sep = parent._sep
             self._types = parent._types
             self._not_recursive_to_others = parent._not_recursive_to_others
+
+    def __str__(self):
+        return f"NestedMKDict({list(self.keys())})"
+
+    _repr_pretty_ = repr_pretty
+
+    def _ipython_key_completions_(self) -> list[str]:
+        return list(self.walkjoinedkeys())
 
     @classmethod
     def from_flatdict(
@@ -353,7 +362,6 @@ class NestedMKDict(ClassWrapper):
         return self._set(key, value)
 
     __setitem__ = set
-
 
     def __contains__(self, key):
         if key == ():
