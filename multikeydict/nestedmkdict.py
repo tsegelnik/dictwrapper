@@ -415,6 +415,9 @@ class NestedMKDict(ClassWrapper):
 
         return new
 
+    def flatten(self, sep: str | None = None) -> dict[str, Any]:
+        return {key: value for key, value in self.walkjoineditems(sep=sep)}
+
     def walkitems(self, startfromkey=(), *, appendstartkey=False, maxdepth=None):
         v0 = self.any(startfromkey)
         k0 = tuple(self.iterkey(startfromkey))
