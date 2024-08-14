@@ -484,6 +484,16 @@ def test_nestedmkdict_eq_01():
     assert dw("a") == dw("a")
     assert dw("a") is not dw("a")
 
+    assert dw.get_dict("a")==d["a"]
+    assert dw.get_dict("a") is not d["a"]
+    assert dw.get_dict("a", unwrap=True)==d["a"]
+    assert dw.get_dict("a", unwrap=True) is d["a"]
+
+    assert dw.get_dict(("a", "b"))==d["a"]["b"]
+    assert dw.get_dict(("a", "b")) is not d["a"]["b"]
+    assert dw.get_dict(("a", "b"), unwrap=True)==d["a"]["b"]
+    assert dw.get_dict(("a", "b"), unwrap=True) is d["a"]["b"]
+
 def test_nestedmkdict_keysmap():
     dct = {
         "a": 1,

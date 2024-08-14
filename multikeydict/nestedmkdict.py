@@ -133,7 +133,7 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    def get_dict(self, key) -> NestedMKDict:
+    def get_dict(self, key, *, unwrap: bool=False) -> NestedMKDict:
         if key == ():
             return self
         head, rest = self.splitkey(key)
@@ -151,7 +151,7 @@ class NestedMKDict(ClassWrapper):
                 )
 
             try:
-                return sub(rest)
+                return sub.get_dict(rest, unwrap=unwrap)
             except KeyError as e:
                 raise KeyError(key) from e
 
@@ -159,6 +159,9 @@ class NestedMKDict(ClassWrapper):
             raise TypeError(
                 f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .get_any({key})..."
             )
+
+        if unwrap:
+            return sub
 
         return self._wrap_(sub, parent=self)
 
