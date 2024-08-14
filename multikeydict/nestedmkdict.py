@@ -67,7 +67,7 @@ class NestedMKDict(ClassWrapper):
     _repr_pretty_ = repr_pretty
 
     def _ipython_key_completions_(self) -> list[str]:
-        return list(self.walkjoinedkeys())
+        return list(self.walkjoinedkeys(include_dicts=True))
 
     @classmethod
     def from_flatdict(
