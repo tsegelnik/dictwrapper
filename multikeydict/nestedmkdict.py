@@ -157,7 +157,7 @@ class NestedMKDict(ClassWrapper):
 
         if not isinstance(sub, (ClassWrapper, self._types)):
             raise TypeError(
-                f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .any({key})..."
+                f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .get_any({key})..."
             )
 
         return self._wrap_(sub, parent=self)
@@ -196,31 +196,6 @@ class NestedMKDict(ClassWrapper):
 
         raise ValueError(f"Invalid key: {key}")
 
-    def any(self, key, *, object: bool = False) -> Any:
-        if key == ():
-            return self
-        head, rest = self.splitkey(key)
-
-        try:
-            sub = self._object.__getitem__(head)
-        except KeyError as e:
-            raise KeyError(f"No nested key '{key}'") from e
-
-        if not rest:
-            if object:
-                return sub
-            sub = self._wrap(sub, parent=self)
-            return sub
-
-        sub = self._wrap(sub, parent=self)
-        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-            raise TypeError(f"Nested value for {key} has wrong type")
-
-        try:
-            return sub.any(rest, object=object)
-        except KeyError as e:
-            raise KeyError(key) from e
-
     def get(self, key, default=None):
         if key == ():
             raise TypeError("May not return self")
@@ -245,7 +220,7 @@ class NestedMKDict(ClassWrapper):
 
         if isinstance(sub, (ClassWrapper, self._types)):
             raise TypeError(
-                f"Invalid value type {type(sub)} for key [{key}]. Expect non-mapping. Perhaps, one should use ({key}) or .any({key})..."
+                f"Invalid value type {type(sub)} for key [{key}]. Expect non-mapping. Perhaps, one should use ({key}) or .get_any({key})..."
             )
 
         return sub
@@ -269,7 +244,7 @@ class NestedMKDict(ClassWrapper):
                 )
 
             try:
-                return sub[rest]
+                return sub.get_value(rest)
             except KeyError as e:
                 failed_rest = getattr(e, "rest", rest)
                 error = KeyError(f"{key}: {failed_rest}")
@@ -285,7 +260,36 @@ class NestedMKDict(ClassWrapper):
             )
         return sub
 
-    __getitem__ = get_value
+    def get_any(self, key, *, unwrap: bool = False) -> Any:
+        if key == ():
+            return self
+        head, rest = self.splitkey(key)
+
+        try:
+            sub = self._object.__getitem__(head)
+        except KeyError as e:
+            raise KeyError(f"No nested key '{key}'") from e
+
+        if not rest:
+            if unwrap:
+                return sub
+            sub = self._wrap(sub, parent=self)
+            return sub
+
+        sub = self._wrap(sub, parent=self)
+        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+            raise TypeError(f"Nested value for {key} has wrong type")
+
+        try:
+            if unwrap:
+                return sub.get_any(rest, unwrap=unwrap)
+            else:
+                return sub[rest]
+        except KeyError as e:
+            raise KeyError(key) from e
+
+    __getitem__ = get_any
+
 
     def pop(self, key, *, delete_parents: bool = False):
         if key == ():
@@ -431,7 +435,7 @@ class NestedMKDict(ClassWrapper):
         return {key: value for key, value in self.walkjoineditems(sep=sep)}
 
     def walkitems(self, startfromkey=(), *, appendstartkey=False, maxdepth=None):
-        v0 = self.any(startfromkey)
+        v0 = self.get_any(startfromkey)
         k0 = tuple(self.iterkey(startfromkey))
 
         if maxdepth is None:

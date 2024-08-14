@@ -30,7 +30,7 @@ class NestedMKDictAccess:
             # needed for proper operation of __dir__() and ipython completion
             return object.__getattr__(self, key)
 
-        ret = self._.any(key)
+        ret = self._[key]
 
         if isinstance(ret, self._._wrapper_class):
             return ret._
