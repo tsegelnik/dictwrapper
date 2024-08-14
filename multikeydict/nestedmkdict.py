@@ -133,7 +133,7 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    def get_dict(self, key, *, unwrap: bool=False) -> NestedMKDict:
+    def get_dict(self, key, *, unwrap: bool = False) -> NestedMKDict:
         if key == ():
             return self
         head, rest = self.splitkey(key)
@@ -293,7 +293,6 @@ class NestedMKDict(ClassWrapper):
 
     __getitem__ = get_any
 
-
     def pop(self, key, *, delete_parents: bool = False):
         if key == ():
             raise ValueError("May not delete itself")
@@ -437,7 +436,14 @@ class NestedMKDict(ClassWrapper):
     def flatten(self, sep: str | None = None) -> dict[str, Any]:
         return {key: value for key, value in self.walkjoineditems(sep=sep)}
 
-    def walkitems(self, startfromkey=(), *, appendstartkey=False, maxdepth=None):
+    def walkitems(
+        self,
+        startfromkey=(),
+        *,
+        include_dicts: bool = False,
+        appendstartkey: bool = False,
+        maxdepth: int | None = None,
+    ):
         v0 = self.get_any(startfromkey)
         k0 = tuple(self.iterkey(startfromkey))
 
@@ -459,9 +465,13 @@ class NestedMKDict(ClassWrapper):
         for k, v in v0.items():
             k = k0 + (k,)
             if isinstance(v, self._wrapper_class):
-                for k1, v1 in v.walkitems(maxdepth=nextdepth):
+                if include_dicts:
+                    yield k, v
+                for k1, v1 in v.walkitems(include_dicts=include_dicts, maxdepth=nextdepth):
                     yield k + k1, v1
             elif not self._not_recursive_to_others and isinstance(v, Mapping):
+                if include_dicts:
+                    yield k, v
                 for k1, v1 in v.items():
                     if isinstance(k1, tuple):
                         yield k + k1, v1
