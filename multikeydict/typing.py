@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from orderedset import OrderedSet
+from ordered_set import OrderedSet
 
 TupleKey = tuple[str, ...]
 Key = str | tuple[str, ...]
