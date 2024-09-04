@@ -1,5 +1,5 @@
 cython
-orderedset
+ordered-set
 pytest
 pytest-cov
 coverage

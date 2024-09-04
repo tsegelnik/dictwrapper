@@ -49,15 +49,15 @@ def test_nestedmkdict_04(sep):
     #
     assert isinstance(dw("d"), NestedMKDict)
     assert isinstance(dw(("f", "g")), NestedMKDict)
-    assert isinstance(dw.any("d"), NestedMKDict)
-    assert isinstance(dw.any(("f", "g")), NestedMKDict)
-    assert isinstance(dw.any("d", object=True), dict)
-    assert isinstance(dw.any(("f", "g"), object=True), dict)
+    assert isinstance(dw["d"], NestedMKDict)
+    assert isinstance(dw[("f", "g")], NestedMKDict)
+    assert isinstance(dw.get_any("d", unwrap=True), dict)
+    assert isinstance(dw.get_any(("f", "g"), unwrap=True), dict)
 
     with raises(TypeError):
-        assert isinstance(dw["d"], NestedMKDict)
+        assert isinstance(dw.get_value("d",), NestedMKDict)
     with raises(TypeError):
-        assert isinstance(dw[("f", "g")], NestedMKDict)
+        assert isinstance(dw.get_value(("f", "g")), NestedMKDict)
     with raises(KeyError):
         dw("i")
 
@@ -67,8 +67,8 @@ def test_nestedmkdict_04(sep):
     assert dw.get(("d", "e")) == 4
     assert dw.get(("d", "e1")) is None
     assert dw.get(("f", "g", "h")) == 5
-    assert dw.any(("f", "g", "h")) == 5
-    assert dw.any(("f", "g", "h"), object=True) == 5
+    assert dw[("f", "g", "h")] == 5
+    assert dw.get_any(("f", "g", "h"), unwrap=True) == 5
     with raises(KeyError):
         dw.get(("z", "z", "z"))
 
@@ -483,6 +483,16 @@ def test_nestedmkdict_eq_01():
     assert dw("a") != d
     assert dw("a") == dw("a")
     assert dw("a") is not dw("a")
+
+    assert dw.get_dict("a")==d["a"]
+    assert dw.get_dict("a") is not d["a"]
+    assert dw.get_dict("a", unwrap=True)==d["a"]
+    assert dw.get_dict("a", unwrap=True) is d["a"]
+
+    assert dw.get_dict(("a", "b"))==d["a"]["b"]
+    assert dw.get_dict(("a", "b")) is not d["a"]["b"]
+    assert dw.get_dict(("a", "b"), unwrap=True)==d["a"]["b"]
+    assert dw.get_dict(("a", "b"), unwrap=True) is d["a"]["b"]
 
 def test_nestedmkdict_keysmap():
     dct = {

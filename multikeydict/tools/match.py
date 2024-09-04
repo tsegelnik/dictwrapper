@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import suppress
 from typing import TYPE_CHECKING, Any
 
-from orderedset import OrderedSet
+from ordered_set import OrderedSet
 
 from ..typing import Key, KeyLike, TupleKey, properkey, setkey
 
