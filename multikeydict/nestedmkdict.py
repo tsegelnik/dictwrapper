@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Generator, Iterable, Mapping, MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
 
 from .classwrapper import ClassWrapper
 from .flatmkdict import FlatMKDict
@@ -434,7 +437,7 @@ class NestedMKDict(ClassWrapper):
         return new
 
     def flatten(self, sep: str | None = None) -> dict[str, Any]:
-        return {key: value for key, value in self.walkjoineditems(sep=sep)}
+        return dict(self.walkjoineditems(sep=sep))
 
     def walkitems(
         self,
@@ -467,7 +470,9 @@ class NestedMKDict(ClassWrapper):
             if isinstance(v, self._wrapper_class):
                 if include_dicts:
                     yield k, v
-                for k1, v1 in v.walkitems(include_dicts=include_dicts, maxdepth=nextdepth):
+                for k1, v1 in v.walkitems(
+                    include_dicts=include_dicts, maxdepth=nextdepth
+                ):
                     yield k + k1, v1
             elif not self._not_recursive_to_others and isinstance(v, Mapping):
                 if include_dicts:
