@@ -2,8 +2,9 @@ from itertools import product
 
 from pytest import raises
 
+from numpy import array
 from multikeydict.nestedmkdict import NestedMKDict
-from multikeydict.tools import remap_items
+from multikeydict.tools import mkmap, remap_items
 
 
 def test_remap_items_01():
@@ -52,9 +53,7 @@ def test_remap_items_01():
             if i2new != "a":
                 d_renamed_reordered_skipped_target_match["z1", i2new, i1] = c
                 if i1 != "1":
-                    d_renamed_reordered_skipped_target_match[
-                        "z2", i2new, i1
-                    ] = c
+                    d_renamed_reordered_skipped_target_match["z2", i2new, i1] = c
         else:
             d_renamed_match[i1, i2new, i3] = c
             d_renamed_reordered_match[i3, i2new, i1] = c
@@ -125,3 +124,68 @@ def test_remap_items_01():
 
     with raises(ValueError):
         remap_items(d_main, reorder_indices=[["a", "b", "c"], ["c", "a", "B"]])
+
+
+def test_mkmap_01():
+    m1 = NestedMKDict(
+        {
+            "a": 0,
+            "b": {"c": 1},
+            "d": {
+                "e": {"f": 2},
+            },
+        }
+    )
+
+    m2 = mkmap((lambda d: -d-1), m1, sep=".")
+    assert m1._sep is None
+    assert m2._sep == "."
+
+    array1 = array(list(m1.walkvalues()))
+    array2 = array(list(m2.walkvalues()))
+    assert all((array1)==list(range(3)))
+    assert all((array2)==list(range(-1, -4, -1)))
+    assert list(m1.walkkeys())==list(m2.walkkeys())
+
+    sumfn = lambda a, b: a+b
+    m3a = mkmap(sumfn, m1, m2)
+    m3b = mkmap(sumfn, m1, m2, sep=False)
+    m3c = mkmap(sumfn, m1, m2, sep=True)
+    m3d = mkmap(sumfn, m1, m2, sep=0)
+    m3e = mkmap(sumfn, m1, m2, sep=1)
+    m3f = mkmap(sumfn, m1, m2, sep=-1)
+    m3g = mkmap(sumfn, m1, m2, sep="/")
+
+    assert list(m1.walkkeys())==list(m3a.walkkeys())
+    assert list(m1.walkkeys())==list(m3b.walkkeys())
+    assert list(m1.walkkeys())==list(m3c.walkkeys())
+    assert list(m1.walkkeys())==list(m3d.walkkeys())
+    assert list(m1.walkkeys())==list(m3e.walkkeys())
+    assert list(m1.walkkeys())==list(m3f.walkkeys())
+    assert list(m1.walkkeys())==list(m3g.walkkeys())
+
+    assert all(array(list(m3a.walkvalues()))==-1)
+    assert all(array(list(m3b.walkvalues()))==-1)
+    assert all(array(list(m3c.walkvalues()))==-1)
+    assert all(array(list(m3d.walkvalues()))==-1)
+    assert all(array(list(m3e.walkvalues()))==-1)
+    assert all(array(list(m3f.walkvalues()))==-1)
+    assert all(array(list(m3g.walkvalues()))==-1)
+
+    assert m3a._sep is None
+    assert m3b._sep is None
+    assert m3c._sep is None
+    assert m3d._sep is None
+    assert m3e._sep == "."
+    assert m3f._sep == "."
+    assert m3g._sep == "/"
+
+
+    with raises(IndexError):
+        mkmap(sumfn, m1, m2, sep=2)
+
+    with raises(IndexError):
+        mkmap(sumfn, m1, m2, sep=-2)
+
+    with raises(TypeError):
+        mkmap(sumfn, m1, m2, sep=-2.0)
