@@ -60,9 +60,9 @@ def remap_items(
     if target is None:
         target = NestedMKDict()
 
-    skip_source = make_skip_fcn(skip_indices_source)
-    skip_target = make_skip_fcn(skip_indices_target)
-    reorder = make_reorder_fcn(reorder_indices)
+    skip_source = _make_skip_fcn(skip_indices_source)
+    skip_target = _make_skip_fcn(skip_indices_target)
+    reorder = _make_reorder_fcn(reorder_indices)
 
     if rename_indices is not None:
         for key, value in source.walkitems():
@@ -85,7 +85,7 @@ def remap_items(
     return target
 
 
-def make_skip_fcn(
+def _make_skip_fcn(
     skip_indices: Sequence[KeyLike | set] | None,
 ) -> Callable[[Key], bool]:
     if skip_indices is not None:
@@ -97,7 +97,7 @@ def make_skip_fcn(
     return lambda _: False
 
 
-def make_reorder_fcn(
+def _make_reorder_fcn(
     reorder_indices: (
         tuple[int]
         | tuple[tuple[str, ...], tuple[str, ...]]
