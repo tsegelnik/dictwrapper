@@ -26,8 +26,7 @@ def test_remap_items_01():
     skip_indices_source = (("1", "z"), ("b",))
     skip_indices_target = (("1", "z2"), ("a",))
 
-    c = 0
-    for i1, i2, i3 in product("123", "abc", "xyz"):
+    for c, (i1, i2, i3) in enumerate(product("123", "abc", "xyz")):
         d_main[i1, i2, i3] = c
         d_reordered_match[i3, i2, i1] = c
         if (i1 != "1" or i3 != "z") and i2 != "b":
@@ -63,8 +62,6 @@ def test_remap_items_01():
                 d_renamed_reordered_skipped_source_match[i3, i2new, i1] = c
                 if i2new != "a":
                     d_renamed_reordered_skipped_both_match[i3, i2new, i1] = c
-
-        c += 1
 
     d_new = remap_items(d_main, reorder_indices=reorder_indices)
     assert d_reordered_match == d_new

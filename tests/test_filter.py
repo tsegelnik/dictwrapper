@@ -1,6 +1,5 @@
 from itertools import product
 
-from multikeydict.nestedmkdict import NestedMKDict
 from multikeydict.tools import filter_items
 
 
