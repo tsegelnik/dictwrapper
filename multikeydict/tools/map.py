@@ -13,7 +13,10 @@ if TYPE_CHECKING:
 
 
 def mkmap(
-    fcn: Callable, arg0: NestedMKDict, *args: NestedMKDict, sep: int | str | bool | None = None
+    fcn: Callable,
+    arg0: NestedMKDict,
+    *args: NestedMKDict,
+    sep: int | str | bool | None = None,
 ) -> NestedMKDict:
     match sep:
         case False:
@@ -22,9 +25,9 @@ def mkmap(
         case 0 | True:
             sep = arg0._sep
         case int():
-            if sep>0:
+            if sep > 0:
                 sep = args[sep - 1]._sep
-            elif sep>=-len(args):
+            elif sep >= -len(args):
                 sep = args[sep]._sep
             else:
                 raise IndexError()
@@ -110,14 +113,20 @@ def _make_reorder_fcn(
         case [int(), *_]:
             index_order = reorder_indices
         case [[str(), *_], [str(), *_]]:
-            order1, order2 = reorder_indices
-            if len(order1) != len(order2) or set(order1) != set(order2):
+            order_from, order_to = reorder_indices
+            if len(order_from) != len(order_to) or set(order_from) != set(order_to):
                 raise ValueError(
-                    f"Order definitions are inconsistent: {order1} and {order2}"
+                    f"Inconsistent order definitions: {order_from} and {order_to}"
                 )
-            index_order = tuple(order1.index(item) for item in order2)
-        case _:
-            index_order = None
+            try:
+                index_order = tuple(order_from.index(item) for item in order_to)
+            except ValueError:
+                raise ValueError(
+                    f"Inconsistent order definitions {order_from} and {order_to}"
+                )
+        case None:
             return lambda key: key
+        case _:
+            raise ValueError(f"Invalid order specification: {reorder_indices}")
 
     return lambda key: tuple(key[idx] for idx in index_order)
