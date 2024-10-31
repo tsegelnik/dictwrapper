@@ -1,6 +1,6 @@
 import pytest
 from multikeydict.nestedmkdict import NestedMKDict
-from multikeydict.nestedmkdict import walkitems
+from multikeydict.nestedmkdict import walkitems, walkkeys, walkvalues
 from pytest import raises
 
 
@@ -419,9 +419,15 @@ def test_nestedmkdict_09_walk():
     keys0 = [("a",), ("b",), ("c",), ("d", "e"), ("f", "g", "h")]
     keys1 = [k for k, v in dw.walkitems()]
     keys2 = [k for k, v in walkitems(dw)]
+    keys3 = [k for k in walkkeys(dw)]
     assert keys1 == keys0
     assert keys2 == keys0
+    assert keys3 == keys0
     assert next(walkitems(123)) == ((), 123)
+
+    values0 = [1, 2, 3, 4, 5]
+    values1 = [v for v in walkvalues(dw)]
+    assert values0 == values1
 
     assert [(k, v) for k, v in dw.walkitems("a", appendstartkey=True)] == [(("a",), 1)]
     assert [(k, v) for k, v in dw.walkitems("a", appendstartkey=False)] == [((), 1)]
