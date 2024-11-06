@@ -7,7 +7,7 @@ Key = str | tuple[str, ...]
 KeyLike = str | Sequence[str]
 
 
-def properkey(key: KeyLike, sep: str | bool | None = None) -> TupleKey:
+def properkey(key: KeyLike, *, sep: str | bool | None = None) -> TupleKey:
     if isinstance(key, str):
         if isinstance(sep, str):
             return tuple(key.split(sep))
@@ -35,7 +35,7 @@ def setkey(key: KeyLike) -> set[str]:
     return set(key)
 
 
-def strkey(key: KeyLike, sep=".") -> str:
+def strkey(key: KeyLike, *, sep=".") -> str:
     if isinstance(key, str):
         return key
 
