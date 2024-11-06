@@ -65,7 +65,7 @@ def remap_items(
 
     skip_source = _make_skip_fcn(skip_indices_source)
     skip_target = _make_skip_fcn(skip_indices_target)
-    reorder = _make_reorder_fcn(reorder_indices)
+    reorder = make_reorder_function(reorder_indices)
 
     if rename_indices is not None:
         for key, value in source.walkitems():
@@ -100,7 +100,7 @@ def _make_skip_fcn(
     return lambda _: False
 
 
-def _make_reorder_fcn(
+def make_reorder_function(
     reorder_indices: (
         tuple[int]
         | tuple[tuple[str, ...], tuple[str, ...]]
