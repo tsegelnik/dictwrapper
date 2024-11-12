@@ -67,6 +67,9 @@ class NestedMKDict(ClassWrapper):
     def __str__(self):
         return f"NestedMKDict({list(self.keys())})"
 
+    def __repr__(self):
+        return object.__repr__(self)
+
     _repr_pretty_ = repr_pretty
 
     def _ipython_key_completions_(self) -> list[str]:
