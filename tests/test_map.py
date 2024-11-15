@@ -66,6 +66,9 @@ def test_remap_items_01():
     d_new = remap_items(d_main, reorder_indices=reorder_indices)
     assert d_reordered_match == d_new
 
+    with raises(ValueError):
+        remap_items(d_main, reorder_indices=reorder_indices[:-1])
+
     d_new = remap_items(d_main, reorder_indices=reorder_indices_names)
     assert d_reordered_match == d_new
 

@@ -129,4 +129,9 @@ def make_reorder_function(
         case _:
             raise ValueError(f"Invalid order specification: {reorder_indices}")
 
-    return lambda key: tuple(key[idx] for idx in index_order)
+    def reorder_indices(key):
+        if len(key)!=len(index_order):
+            raise ValueError(f"inconsistent index length: {len(index_order)} vs required {len(key)}")
+        return tuple(key[idx] for idx in index_order)
+
+    return reorder_indices
