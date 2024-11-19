@@ -1,10 +1,11 @@
 from itertools import product
 
+from numpy import array
 from pytest import raises
 
-from numpy import array
 from multikeydict.nestedmkdict import NestedMKDict
 from multikeydict.tools import mkmap, remap_items
+from multikeydict.tools.map import make_reorder_function
 
 
 def test_remap_items_01():
@@ -137,17 +138,17 @@ def test_mkmap_01():
         }
     )
 
-    m2 = mkmap((lambda d: -d-1), m1, sep=".")
+    m2 = mkmap((lambda d: -d - 1), m1, sep=".")
     assert m1._sep is None
     assert m2._sep == "."
 
     array1 = array(list(m1.walkvalues()))
     array2 = array(list(m2.walkvalues()))
-    assert all((array1)==list(range(3)))
-    assert all((array2)==list(range(-1, -4, -1)))
-    assert list(m1.walkkeys())==list(m2.walkkeys())
+    assert all((array1) == list(range(3)))
+    assert all((array2) == list(range(-1, -4, -1)))
+    assert list(m1.walkkeys()) == list(m2.walkkeys())
 
-    sumfn = lambda a, b: a+b
+    sumfn = lambda a, b: a + b
     m3a = mkmap(sumfn, m1, m2)
     m3b = mkmap(sumfn, m1, m2, sep=False)
     m3c = mkmap(sumfn, m1, m2, sep=True)
@@ -156,21 +157,21 @@ def test_mkmap_01():
     m3f = mkmap(sumfn, m1, m2, sep=-1)
     m3g = mkmap(sumfn, m1, m2, sep="/")
 
-    assert list(m1.walkkeys())==list(m3a.walkkeys())
-    assert list(m1.walkkeys())==list(m3b.walkkeys())
-    assert list(m1.walkkeys())==list(m3c.walkkeys())
-    assert list(m1.walkkeys())==list(m3d.walkkeys())
-    assert list(m1.walkkeys())==list(m3e.walkkeys())
-    assert list(m1.walkkeys())==list(m3f.walkkeys())
-    assert list(m1.walkkeys())==list(m3g.walkkeys())
+    assert list(m1.walkkeys()) == list(m3a.walkkeys())
+    assert list(m1.walkkeys()) == list(m3b.walkkeys())
+    assert list(m1.walkkeys()) == list(m3c.walkkeys())
+    assert list(m1.walkkeys()) == list(m3d.walkkeys())
+    assert list(m1.walkkeys()) == list(m3e.walkkeys())
+    assert list(m1.walkkeys()) == list(m3f.walkkeys())
+    assert list(m1.walkkeys()) == list(m3g.walkkeys())
 
-    assert all(array(list(m3a.walkvalues()))==-1)
-    assert all(array(list(m3b.walkvalues()))==-1)
-    assert all(array(list(m3c.walkvalues()))==-1)
-    assert all(array(list(m3d.walkvalues()))==-1)
-    assert all(array(list(m3e.walkvalues()))==-1)
-    assert all(array(list(m3f.walkvalues()))==-1)
-    assert all(array(list(m3g.walkvalues()))==-1)
+    assert all(array(list(m3a.walkvalues())) == -1)
+    assert all(array(list(m3b.walkvalues())) == -1)
+    assert all(array(list(m3c.walkvalues())) == -1)
+    assert all(array(list(m3d.walkvalues())) == -1)
+    assert all(array(list(m3e.walkvalues())) == -1)
+    assert all(array(list(m3f.walkvalues())) == -1)
+    assert all(array(list(m3g.walkvalues())) == -1)
 
     assert m3a._sep is None
     assert m3b._sep is None
@@ -180,7 +181,6 @@ def test_mkmap_01():
     assert m3f._sep == "."
     assert m3g._sep == "/"
 
-
     with raises(IndexError):
         mkmap(sumfn, m1, m2, sep=2)
 
@@ -189,3 +189,41 @@ def test_mkmap_01():
 
     with raises(TypeError):
         mkmap(sumfn, m1, m2, sep=-2.0)
+
+
+def test_reorder_function():
+    data_from = [1, 2, 3]
+
+    fcn0 = make_reorder_function(None)
+    assert data_from == fcn0(data_from)
+
+    fcn1 = make_reorder_function([2, 0, 1])
+    data1 = [3, 1, 2]
+    assert data1 == fcn1(data_from)
+
+    fcn2 = make_reorder_function([2, 0, 1])
+    data2 = [3, 1, 2]
+    assert data2 == fcn2(data_from)
+
+    fcn3 = make_reorder_function([2, 0])
+    data3 = [3, 1]
+    with raises(ValueError):
+        assert data3 == fcn3(data_from)
+
+    fcn3 = make_reorder_function([2, 0], allow_skip_items=True)
+    assert data3 == fcn3(data_from)
+
+    fcn4 = make_reorder_function([list("abc"), list("cab")])
+    data4 = [3, 1, 2]
+    assert data4 == fcn4(data_from)
+
+    fcn5 = make_reorder_function([list("abc"), list("ca")])
+    data5 = [3, 1]
+    assert data5 == fcn5(data_from)
+
+    fcn6 = make_reorder_function([list("abc"), list("caba")])
+    data6 = [3, 1, 2, 1]
+    assert data6 == fcn6(data_from)
+
+    with raises(ValueError):
+        make_reorder_function([list("abc"), list("cad")])

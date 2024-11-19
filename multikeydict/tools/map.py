@@ -104,20 +104,20 @@ def make_reorder_function(
     reorder_indices: (
         tuple[int]
         | tuple[tuple[str, ...], tuple[str, ...]]
-        | list[int]
-        | list[list[str]]
+        | Sequence[int]
+        | Sequence[Sequence[str]]
         | None
-    )
-) -> Callable[[Key], Key]:
+    ),
+    *,
+    allow_skip_items: bool = False
+) -> Callable:
     match reorder_indices:
         case [int(), *_]:
             index_order = reorder_indices
+            len_from = len(index_order)
         case [[str(), *_], [str(), *_]]:
             order_from, order_to = reorder_indices
-            if len(order_from) != len(order_to) or set(order_from) != set(order_to):
-                raise ValueError(
-                    f"Inconsistent order definitions: {order_from} and {order_to}"
-                )
+            len_from = len(order_from)
             try:
                 index_order = tuple(order_from.index(item) for item in order_to)
             except ValueError:
@@ -125,13 +125,15 @@ def make_reorder_function(
                     f"Inconsistent order definitions {order_from} and {order_to}"
                 )
         case None:
+            len_from = None
+            allow_skip_items = True
             return lambda key: key
         case _:
             raise ValueError(f"Invalid order specification: {reorder_indices}")
 
-    def reorder_indices(key):
-        if len(key)!=len(index_order):
+    def reorder_indices(key: Sequence):
+        if not allow_skip_items and len(key)!=len_from:
             raise ValueError(f"inconsistent index length: {len(index_order)} vs required {len(key)}")
-        return tuple(key[idx] for idx in index_order)
+        return key.__class__(key[idx] for idx in index_order)
 
     return reorder_indices
