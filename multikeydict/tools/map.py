@@ -56,7 +56,8 @@ def remap_items(
     ) = None,
     skip_indices_source: Sequence[KeyLike | set] | None = None,
     skip_indices_target: Sequence[KeyLike | set] | None = None,
-    fcn: Callable[[Any], Any] = lambda o: o,
+    fcn: Callable[[Any], Any] | None = None,
+    verbose: bool = False
 ) -> NestedMKDict:
     from itertools import product
 
@@ -67,6 +68,12 @@ def remap_items(
     skip_target = _make_skip_fcn(skip_indices_target)
     reorder = make_reorder_function(reorder_indices)
 
+    if fcn is None:
+        fcn = lambda o: o
+        has_fcn = False
+    else:
+        has_fcn = True
+
     if rename_indices is not None:
         for key, value in source.walkitems():
             if skip_source(key):
@@ -76,13 +83,21 @@ def remap_items(
             ):
                 newkey_ordered = reorder(newkey)
                 if skip_target(newkey_ordered):
+                    if verbose:
+                        print(f"remap: skip {'.'.join(key)} → {'.'.join(newkey_ordered)}")
                     continue
+                if verbose:
+                    print(f"remap {'(fcn) ' if has_fcn else ''}{'.'.join(key)} → {'.'.join(newkey_ordered)}")
                 target[newkey_ordered] = fcn(value)
     else:
         for key, value in source.walkitems():
             newkey_ordered = reorder(key)
             if skip_target(newkey_ordered):
+                if verbose:
+                    print(f"remap: skip {'.'.join(key)} → {'.'.join(newkey_ordered)}")
                 continue
+            if verbose:
+                print(f"remap {'(fcn) ' if has_fcn else ''}{'.'.join(key)} → {'.'.join(newkey_ordered)}")
             target[newkey_ordered] = fcn(value)
 
     return target
