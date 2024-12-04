@@ -18,6 +18,7 @@ def match_keys(
     *,
     fcn_outer_before: Callable[[TupleKey], Any] | None = None,
     fcn_outer_after: Callable[[TupleKey], Any] | None = None,
+    fcn_skip: Callable[[int, TupleKey, TupleKey], Any] | None = None,
     left_in_right: bool = True,
     right_in_left: bool = True,
     require_all_right_keys_processed: bool = True,
@@ -73,6 +74,8 @@ def match_keys(
                             and key_left_proper not in processed_left_keys
                         ):
                             skipped_left_keys.add(key_left_proper)
+                        if fcn_skip:
+                            fcn_skip(i_left, key_left_proper, key_right_proper)
                         continue
                 else:
                     key_left_proper = ()
