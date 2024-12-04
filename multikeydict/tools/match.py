@@ -51,7 +51,9 @@ def match_keys(
     processed_left_keys = set()
     skipped_left_keys = set()
 
-    collect_skipped_left_keys = require_all_left_keys_processed or skippable_left_keys_should_contain
+    collect_skipped_left_keys = (
+        require_all_left_keys_processed or skippable_left_keys_should_contain
+    )
 
     for key_right in keys_right:
         key_right_proper = properkey(key_right)
@@ -94,11 +96,13 @@ def match_keys(
             raise ValueError(
                 f"match_keys: there were unprocessed left keys {skipped_left_keys!s}"
             )
-        if _check_skipped_keys_incorrect(
+        failure, incorrectly_skipped_key = _check_skipped_keys_incorrect(
             skipped_left_keys, skippable_left_keys_should_contain
-        ):
+        )
+        if failure:
             raise ValueError(
-                f"match_keys: there were unprocessed left keys {skipped_left_keys!s}"
+                f"match_keys: there were unprocessed left keys {skipped_left_keys!s}. "
+                f"{incorrectly_skipped_key} should not have been skipped."
             )
 
     if require_all_right_keys_processed and skipped_right_keys:
@@ -109,13 +113,13 @@ def match_keys(
 
 def _check_skipped_keys_incorrect(
     skipped_keys: Sequence[Key] | set[Key], should_contain: Sequence[KeyLike] | None
-) -> bool:
+) -> tuple[bool, Key | None]:
     if not should_contain:
-        return False
+        return False, None
 
     setkeys = tuple(setkey(keypart) for keypart in should_contain)
     for skipped_key in skipped_keys:
         if not any(setkey.issubset(skipped_key) for setkey in setkeys):
-            return True
+            return True, skipped_key
 
-    return False
+    return False, None
