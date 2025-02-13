@@ -173,8 +173,11 @@ class NestedMKDict(ClassWrapper):
         return self._object.keys()
 
     def iterkey(self, key):
-        if isinstance(key, str) and self._sep:
-            yield from key.split(self._sep)
+        if isinstance(key, str):
+            if self._sep:
+                yield from key.split(self._sep)
+            else:
+                yield key
         elif isinstance(key, Sequence):
             for sk in key:
                 yield from self.iterkey(sk)
