@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Generator, Mapping, MutableMapping, Sequence
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable
+from typing import TYPE_CHECKING
 
 from .classwrapper import ClassWrapper
 from .flatmkdict import FlatMKDict
 from .ipython import repr_pretty
 from .nestedmkdictaccess import NestedMKDictAccess
-from .typing import KeyLike
 from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Any
+
+    from .typing import KeyLike
 
 
 class NestedMKDict(ClassWrapper):
@@ -84,10 +86,7 @@ class NestedMKDict(ClassWrapper):
     ) -> NestedMKDict:
         """Make a nested dictionary from a flat dictionary"""
         ret = NestedMKDict({}, *args, **kwargs)
-        if isinstance(dct, Mapping):
-            iterable = dct.items()
-        else:
-            iterable = dct
+        iterable = dct.items() if isinstance(dct, Mapping) else dct
         for key, value in iterable:
             ret[key] = value
         return ret
@@ -166,10 +165,7 @@ class NestedMKDict(ClassWrapper):
                 f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .get_any({key})..."
             )
 
-        if unwrap:
-            return sub
-
-        return self._wrap_(sub, parent=self)
+        return sub if unwrap else self._wrap_(sub, parent=self)
 
     __call__ = get_dict
 
@@ -177,11 +173,8 @@ class NestedMKDict(ClassWrapper):
         return self._object.keys()
 
     def iterkey(self, key):
-        if isinstance(key, str):
-            if self._sep:
-                yield from key.split(self._sep)
-            else:
-                yield key
+        if isinstance(key, str) and self._sep:
+            yield from key.split(self._sep)
         elif isinstance(key, Sequence):
             for sk in key:
                 yield from self.iterkey(sk)
@@ -221,15 +214,14 @@ class NestedMKDict(ClassWrapper):
         if rest:
             sub = self._wrap(sub, parent=self)
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(
-                    f"Expect non-mapping as value for {key}, got {type(sub).__name__}"
-                )
+                raise TypeError(f"Expect non-mapping as value for {key}, got {type(sub).__name__}")
 
             return sub.get(rest, default)
 
         if isinstance(sub, (ClassWrapper, self._types)):
             raise TypeError(
-                f"Invalid value type {type(sub)} for key [{key}]. Expect non-mapping. Perhaps, one should use ({key}) or .get_any({key})..."
+                f"Invalid value type {type(sub)} for key [{key}]. Expect non-mapping. "
+                f"Perhaps, one should use ({key}) or .get_any({key})..."
             )
 
         return sub
@@ -248,9 +240,7 @@ class NestedMKDict(ClassWrapper):
         if rest:
             sub = self._wrap(sub, parent=self)
             if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(
-                    f"Expect non-mapping as value for {key}, got {type(sub).__name__}"
-                )
+                raise TypeError(f"Expect non-mapping as value for {key}, got {type(sub).__name__}")
 
             try:
                 return sub.get_value(rest)
@@ -264,9 +254,7 @@ class NestedMKDict(ClassWrapper):
                 raise error from e
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(
-                f"Invalid value type {type(sub)} for key {key}. Expect non-mapping."
-            )
+            raise TypeError(f"Invalid value type {type(sub)} for key {key}. Expect non-mapping.")
         return sub
 
     def get_any(self, key, *, unwrap: bool = False) -> Any:
@@ -290,10 +278,7 @@ class NestedMKDict(ClassWrapper):
             raise TypeError(f"Nested value for {key} has wrong type")
 
         try:
-            if unwrap:
-                return sub.get_any(rest, unwrap=unwrap)
-            else:
-                return sub[rest]
+            return sub.get_any(rest, unwrap=unwrap) if unwrap else sub[rest]
         except KeyError as e:
             raise KeyError(key) from e
 
@@ -430,11 +415,7 @@ class NestedMKDict(ClassWrapper):
         )
         for k, v in self.items():
             k = (k,)
-            if isinstance(v, self._wrapper_class):
-                new[k] = v.deepcopy()._object
-            else:
-                new[k] = v
-
+            new[k] = v.deepcopy()._object if isinstance(v, self._wrapper_class) else v
         new._sep = self._sep
 
         return new
@@ -453,11 +434,7 @@ class NestedMKDict(ClassWrapper):
         v0 = self.get_any(startfromkey)
         k0 = tuple(self.iterkey(startfromkey))
 
-        if maxdepth is None:
-            nextdepth = None
-        else:
-            nextdepth = max(maxdepth - len(k0) - 1, 0)
-
+        nextdepth = None if maxdepth is None else max(maxdepth - len(k0) - 1, 0)
         if maxdepth == 0 or not isinstance(v0, self._wrapper_class):
             if appendstartkey:
                 yield k0, v0
@@ -473,9 +450,7 @@ class NestedMKDict(ClassWrapper):
             if isinstance(v, self._wrapper_class):
                 if include_dicts:
                     yield k, v
-                for k1, v1 in v.walkitems(
-                    include_dicts=include_dicts, maxdepth=nextdepth
-                ):
+                for k1, v1 in v.walkitems(include_dicts=include_dicts, maxdepth=nextdepth):
                     yield k + k1, v1
             elif not self._not_recursive_to_others and isinstance(v, Mapping):
                 if include_dicts:
@@ -501,10 +476,11 @@ class NestedMKDict(ClassWrapper):
             yield (), self
 
     def keysmap(self) -> NestedMKDict:
-        """Return a nested dictionary instance with similar structure, but dictionaries are replaced with tuples of their keys"""
-        return NestedMKDict.from_flatdict(
-            {k: tuple(dct.keys()) for k, dct in self.walkdicts()}
-        )
+        """
+        Return a nested dictionary instance with similar structure,
+        but dictionaries are replaced with tuples of their keys
+        """
+        return NestedMKDict.from_flatdict({k: tuple(dct.keys()) for k, dct in self.walkdicts()})
 
     def unique_key_parts(self) -> set[str]:
         """Return a set with all the unique set parts"""
@@ -517,9 +493,7 @@ class NestedMKDict(ClassWrapper):
         for k, _ in self.walkitems(*args, **kwargs):
             yield k
 
-    def walkjoinedkeys(
-        self, *args, sep: str | None = None, **kwargs
-    ) -> Generator[str, None, None]:
+    def walkjoinedkeys(self, *args, sep: str | None = None, **kwargs) -> Generator[str, None, None]:
         if sep is None:
             sep = self._sep
         if sep is None:
@@ -580,8 +554,8 @@ class NestedMKDict(ClassWrapper):
         for k, v in other.walkitems():
             try:
                 key_already_present = k in self
-            except TypeError:
-                raise TypeError(f"Value for part({k}) is non nestable")
+            except TypeError as e:
+                raise TypeError(f"Value for part({k}) is non nestable") from e
             else:
                 if key_already_present:
                     raise TypeError(f"Key {k} already present")
@@ -589,6 +563,54 @@ class NestedMKDict(ClassWrapper):
         return self
 
     __ixor__ = update_missing
+
+    ########################################
+    ### DagFlow: graph connection
+    #
+    ### NOTE: tests are located in the main DagFlow repo;
+    ###       see https://git.jinr.ru/dag-computing/dag-flow
+    #
+    ### TODO: should we catch exceptions here explicitly?
+    ########################################
+    def __rshift__(self, other):
+        """self >> other"""
+        from dagflow.core.node_base import NodeBase
+        from dagflow.core.output import Output
+        from dagflow.parameters import Parameter
+
+        for obj in self.walkvalues():
+            if isinstance(obj, Output) and not obj.connected():
+                obj >> other
+            elif isinstance(obj, Parameter):
+                out = obj.output
+                if not out.connected():
+                    out >> other
+            elif isinstance(obj, NodeBase) and obj.outputs.len_all() == 1:
+                out = obj.outputs[0]
+                if not out.connected():
+                    out >> other
+
+    def __lshift__(self, other):
+        """self << other"""
+        from dagflow.core.node_base import NodeBase
+
+        for obj in self.walkvalues():
+            if isinstance(obj, NodeBase):
+                obj << other
+
+    def __rlshift__(self, other):
+        """other << self"""
+        from dagflow.core.output import Output
+        from dagflow.parameters import Parameter
+
+        if not isinstance(other, (Sequence, Generator)):
+            raise RuntimeError(f"Cannot connect `{type(other)} << NestedMKDict`")
+
+        for obj in self.walkvalues():
+            if isinstance(obj, Output):
+                obj << other
+            elif isinstance(obj, Parameter):
+                obj.output << other
 
 
 def walkitems(obj: NestedMKDict | Any, *args, **kwargs):
