@@ -52,12 +52,13 @@ def remap_items(
         | tuple[tuple[str, ...], tuple[str, ...]]
         | list[int]
         | list[list[str]]
+        | Mapping[str, list[str] | tuple[str]]
         | None
     ) = None,
     skip_indices_source: Sequence[KeyLike | set] | None = None,
     skip_indices_target: Sequence[KeyLike | set] | None = None,
     fcn: Callable[[Any], Any] | None = None,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> NestedMKDict:
     from itertools import product
 
@@ -84,10 +85,14 @@ def remap_items(
                 newkey_ordered = reorder(newkey)
                 if skip_target(newkey_ordered):
                     if verbose:
-                        print(f"remap: skip {'.'.join(key)} → {'.'.join(newkey_ordered)}")
+                        print(
+                            f"remap: skip {'.'.join(key)} → {'.'.join(newkey_ordered)}"
+                        )
                     continue
                 if verbose:
-                    print(f"remap {'(fcn) ' if has_fcn else ''}{'.'.join(key)} → {'.'.join(newkey_ordered)}")
+                    print(
+                        f"remap {'(fcn) ' if has_fcn else ''}{'.'.join(key)} → {'.'.join(newkey_ordered)}"
+                    )
                 target[newkey_ordered] = fcn(value)
     else:
         for key, value in source.walkitems():
@@ -97,7 +102,9 @@ def remap_items(
                     print(f"remap: skip {'.'.join(key)} → {'.'.join(newkey_ordered)}")
                 continue
             if verbose:
-                print(f"remap {'(fcn) ' if has_fcn else ''}{'.'.join(key)} → {'.'.join(newkey_ordered)}")
+                print(
+                    f"remap {'(fcn) ' if has_fcn else ''}{'.'.join(key)} → {'.'.join(newkey_ordered)}"
+                )
             target[newkey_ordered] = fcn(value)
 
     return target
@@ -121,17 +128,20 @@ def make_reorder_function(
         | tuple[tuple[str, ...], tuple[str, ...]]
         | Sequence[int]
         | Sequence[Sequence[str]]
+        | Mapping[str, list[str] | tuple[str]]
         | None
     ),
     *,
-    allow_skip_items: bool = False
+    allow_skip_items: bool = False,
 ) -> Callable:
     match reorder_indices:
         case [int(), *_]:
             index_order = reorder_indices
             len_from = len(index_order)
-        case [[str(), *_], [str(), *_]]:
-            order_from, order_to = reorder_indices
+        case [[str(), *_] as order_from, [str(), *_] as order_to] | {
+            "from": [str(), *_] as order_from,
+            "to": [str(), *_] as order_to,
+        }:
             len_from = len(order_from)
             try:
                 index_order = tuple(order_from.index(item) for item in order_to)
@@ -139,6 +149,7 @@ def make_reorder_function(
                 raise ValueError(
                     f"Inconsistent order definitions {order_from} and {order_to}"
                 )
+            pass
         case None:
             len_from = None
             allow_skip_items = True
@@ -147,8 +158,10 @@ def make_reorder_function(
             raise ValueError(f"Invalid order specification: {reorder_indices}")
 
     def reorder_indices(key: Sequence):
-        if not allow_skip_items and len(key)!=len_from:
-            raise ValueError(f"inconsistent index length: {len(index_order)} vs required {len(key)}")
+        if not allow_skip_items and len(key) != len_from:
+            raise ValueError(
+                f"inconsistent index length: {len(index_order)} vs required {len(key)}"
+            )
         return key.__class__(key[idx] for idx in index_order)
 
     return reorder_indices
