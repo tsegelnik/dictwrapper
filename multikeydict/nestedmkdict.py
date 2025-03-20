@@ -126,7 +126,7 @@ class NestedMKDict(ClassWrapper):
 
         return current
 
-    def child(self, key, *args, type=None, **kwargs) -> Self:
+    def create_child(self, key, *args, type=None, **kwargs) -> Self:
         try:
             ret = self(key)
         except KeyError:

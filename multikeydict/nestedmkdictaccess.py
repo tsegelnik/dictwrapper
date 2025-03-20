@@ -23,7 +23,7 @@ class NestedMKDictAccess:
     _repr_pretty_ = repr_pretty
 
     def __call__(self, key):
-        return self._.child(key)._
+        return self._.create_child(key)._
 
     def __getattr__(self, key):
         if key.startswith("__") and key.endswith("__"):
