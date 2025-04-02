@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Any, Self
     from collections.abc import Generator, Iterable
 
 from .classwrapper import ClassWrapper
