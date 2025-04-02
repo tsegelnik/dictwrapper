@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, Sequence
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Any, Self
     from collections.abc import Generator, Iterable
 
 from .classwrapper import ClassWrapper
@@ -16,7 +17,8 @@ from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
 
 
 class NestedMKDict(ClassWrapper):
-    """Dictionary wrapper managing nested dictionaries
+    """Dictionary wrapper managing nested dictionaries.
+
     The following functionality is implemented:
     - Tuple keys are treated to access nested dictionaries ('key1', 'key2', 'key3')
     - Optionally sep symbol may be set to automatically split string keys into tuple keys:
@@ -81,9 +83,9 @@ class NestedMKDict(ClassWrapper):
         dct: Mapping[KeyLike, Any] | Iterable[tuple[KeyLike, Any]],
         *args,
         **kwargs,
-    ) -> NestedMKDict:
-        """Make a nested dictionary from a flat dictionary"""
-        ret = NestedMKDict({}, *args, **kwargs)
+    ) -> Self:
+        """Make a nested dictionary from a flat dictionary."""
+        ret = cls({}, *args, **kwargs)
         if isinstance(dct, Mapping):
             iterable = dct.items()
         else:
@@ -97,7 +99,7 @@ class NestedMKDict(ClassWrapper):
         return NestedMKDictAccess(self)
 
     @property
-    def parent(self) -> NestedMKDict | None:
+    def parent(self) -> Self | None:
         return self._parent
 
     @property
@@ -110,7 +112,7 @@ class NestedMKDict(ClassWrapper):
 
         raise RuntimeError("Parent key not identified")
 
-    def get_parent(self, level: int = 1) -> NestedMKDict | None:
+    def get_parent(self, level: int = 1) -> Self | None:
         if level == 0:
             return self
         elif level < 0:
@@ -125,7 +127,7 @@ class NestedMKDict(ClassWrapper):
 
         return current
 
-    def child(self, key, *args, type=None, **kwargs):
+    def create_child(self, key, *args, type=None, **kwargs) -> Self:
         try:
             ret = self(key)
         except KeyError:
@@ -139,7 +141,7 @@ class NestedMKDict(ClassWrapper):
 
         return ret
 
-    def get_dict(self, key, *, unwrap: bool = False) -> NestedMKDict:
+    def get_dict(self, key, *, unwrap: bool = False) -> Self:
         if key == ():
             return self
         head, rest = self.splitkey(key)
@@ -163,7 +165,7 @@ class NestedMKDict(ClassWrapper):
 
         if not isinstance(sub, (ClassWrapper, self._types)):
             raise TypeError(
-                f"Invalid value type {type(sub)} for key ({key}). Expect mapping. Perhaps, one should use [{key}] or .get_any({key})..."
+                f"Invalid value type {type(sub)} for key ({key}). Expect non-mapping. Perhaps, one should use [{key}] or .get_any({key})..."
             )
 
         if unwrap:
@@ -413,16 +415,18 @@ class NestedMKDict(ClassWrapper):
         for v in self._object.values():
             yield self._wrap(v, parent=self)
 
-    def copy(self) -> NestedMKDict:
-        return NestedMKDict(
+    def copy(self) -> Self:
+        cls = type(self)
+        return cls(
             self.object.copy(),
             parent=self._parent,
             sep=self._sep,
             recursive_to_others=not self._not_recursive_to_others,
         )
 
-    def deepcopy(self) -> NestedMKDict:
-        new = NestedMKDict(
+    def deepcopy(self) -> Self:
+        cls = type(self)
+        new = cls(
             self._types(),
             parent=self._parent,
             sep=self._sep,
@@ -501,13 +505,14 @@ class NestedMKDict(ClassWrapper):
             yield (), self
 
     def keysmap(self) -> NestedMKDict:
-        """Return a nested dictionary instance with similar structure, but dictionaries are replaced with tuples of their keys"""
+        """Return a nested dictionary instance with similar structure, but
+        dictionaries are replaced with tuples of their keys."""
         return NestedMKDict.from_flatdict(
             {k: tuple(dct.keys()) for k, dct in self.walkdicts()}
         )
 
     def unique_key_parts(self) -> set[str]:
-        """Return a set with all the unique set parts"""
+        """Return a set with all the unique set parts."""
         ret = set()
         for key in self.walkkeys():
             ret.update(key)
@@ -567,7 +572,7 @@ class NestedMKDict(ClassWrapper):
 
         return visitor
 
-    def update(self, other) -> NestedMKDict:
+    def update(self, other) -> Self:
         other = self._wrap(other)
         for k, v in other.walkitems():
             self[k] = v
@@ -575,7 +580,7 @@ class NestedMKDict(ClassWrapper):
 
     __ior__ = update
 
-    def update_missing(self, other) -> NestedMKDict:
+    def update_missing(self, other) -> Self:
         other = self._wrap(other)
         for k, v in other.walkitems():
             try:

@@ -41,7 +41,7 @@ def test_nestedmkdict_04(sep):
     #
     # Test self access
     #
-    assert dw.child(()).object is dct
+    assert dw.create_child(()).object is dct
     assert dw(()).object is dct
 
     #
@@ -146,7 +146,7 @@ def test_nestedmkdict_04(sep):
     #
     # Test children
     #
-    m = dw.child(("k", "l", "m"))
+    m = dw.create_child(("k", "l", "m"))
     assert dw(("k", "l", "m")).object is m.object
 
     #
@@ -154,7 +154,7 @@ def test_nestedmkdict_04(sep):
     #
     dw[("k", "l", "m", "n")] = 5
     with raises(TypeError):
-        dw.child(tuple("klmn"))
+        dw.create_child(tuple("klmn"))
     assert dw.get(("k", "l", "m", "n")) == 5
 
     dw[("o.l.m.n")] = 6
@@ -349,7 +349,7 @@ def test_nestedmkdict_08_create():
     dw._("i.k").l = 3
     assert dw._.i.k.l == 3
 
-    child = dw.child("child")
+    child = dw.create_child("child")
     assert dw("child").object == {}
 
 
