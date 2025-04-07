@@ -1,0 +1,32 @@
+[project]
+name = "dictwrapper"
+version = "0.9.0"
+description = "The package to work with nested dictionaries supporing list/set as keys"
+authors = [
+    {name = "Gonchar Maxim",email = "gonchar@jinr.ru>, Tsegelnik Nikita <tsgelnik@jinr.ru>, Vitalii Zavadskyi <zavadskiy.vs@phystech.edu"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.2.4,<3.0.0)",
+    "ordered-set (>=4.1.0,<5.0.0)"
+]
+
+[project.urls]
+homepage = "https://github.com/tsegelnik/dictwrapper"
+repository = "https://github.com/tsegelnik/dictwrapper"
+documentation = "https://github.com/tsegelnik/dictwrapper/wiki"
+"Bug Tracker" = "https://github.com/tsegelnik/dictwrapper/issues"
+
+[tool.poetry]
+readme = "README.md"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
+coverage = "^7.8.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
