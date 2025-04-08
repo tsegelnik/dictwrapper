@@ -10,6 +10,7 @@ tests:
     - source venv/bin/activate
     - pip install --upgrade wheel setuptools pip
     - pip install cython
+    - python3 -m pip install --upgrade pip
     - pip install -r requirements.txt
     - coverage run --source=. -m pytest
     - coverage report
