@@ -5,16 +5,16 @@ from typing import TYPE_CHECKING
 from .ipython import repr_pretty
 
 if TYPE_CHECKING:
-    from .nestedmkdict import NestedMKDict
+    from .nested_mapping import NestedMapping
 
 
-class NestedMKDictAccess:
-    """NestedMKDict wrapper. Enables attribute based access to nested dictionaries"""
+class NestedMappingAccess:
+    """NestedMapping wrapper. Enables attribute based access to nested dictionaries"""
 
     __slots__ = ("_",)
-    _: NestedMKDict
+    _: NestedMapping
 
-    def __init__(self, dct: NestedMKDict):
+    def __init__(self, dct: NestedMapping):
         object.__setattr__(self, "_", dct)
 
     def __str__(self):
@@ -31,11 +31,7 @@ class NestedMKDictAccess:
             return object.__getattr__(self, key)
 
         ret = self._[key]
-
-        if isinstance(ret, self._._wrapper_class):
-            return ret._
-
-        return ret
+        return ret._ if isinstance(ret, self._._wrapper_class) else ret
 
     def __setattr__(self, key, value):
         self._[key] = value

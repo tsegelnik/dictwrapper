@@ -8,15 +8,14 @@ if TYPE_CHECKING:
     from typing import Any, Self
     from collections.abc import Generator, Iterable
 
-from .classwrapper import ClassWrapper
-from .flatmkdict import FlatMKDict
+from .class_wrapper import ClassWrapper
 from .ipython import repr_pretty
-from .nestedmkdictaccess import NestedMKDictAccess
+from .nested_mapping_access import NestedMappingAccess
 from .typing import KeyLike
-from .visitor import MakeNestedMKDictVisitor, NestedMKDictVisitor
+from .visitor import MakeNestedMappingVisitor, NestedMappingVisitor
 
 
-class NestedMKDict(ClassWrapper):
+class NestedMapping(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries.
 
     The following functionality is implemented:
@@ -32,7 +31,7 @@ class NestedMKDict(ClassWrapper):
     _not_recursive_to_others: bool
 
     def __new__(cls, dic: MutableMapping = {}, *args, **kwargs):
-        if not isinstance(dic, (MutableMapping, NestedMKDict)):
+        if not isinstance(dic, (MutableMapping, NestedMapping)):
             return dic
         return ClassWrapper.__new__(cls)
 
@@ -46,7 +45,7 @@ class NestedMKDict(ClassWrapper):
     ):
         if dic is None:
             dic = {}
-        if isinstance(dic, NestedMKDict):
+        if isinstance(dic, NestedMapping):
             if sep is None:
                 sep = dic._sep
             recursive_to_others = not dic._not_recursive_to_others
@@ -67,7 +66,7 @@ class NestedMKDict(ClassWrapper):
             self._not_recursive_to_others = parent._not_recursive_to_others
 
     def __str__(self):
-        return f"NestedMKDict({list(self.keys())})"
+        return f"NestedMapping({list(self.keys())})"
 
     def __repr__(self):
         return object.__repr__(self)
@@ -86,17 +85,14 @@ class NestedMKDict(ClassWrapper):
     ) -> Self:
         """Make a nested dictionary from a flat dictionary."""
         ret = cls({}, *args, **kwargs)
-        if isinstance(dct, Mapping):
-            iterable = dct.items()
-        else:
-            iterable = dct
+        iterable = dct.items() if isinstance(dct, Mapping) else dct
         for key, value in iterable:
             ret[key] = value
         return ret
 
     @property
     def _(self):
-        return NestedMKDictAccess(self)
+        return NestedMappingAccess(self)
 
     @property
     def parent(self) -> Self | None:
@@ -107,7 +103,7 @@ class NestedMKDict(ClassWrapper):
         if not self._parent:
             return None
         for key, value in self._parent.items():
-            if isinstance(value, NestedMKDict) and value.object is self.object:
+            if isinstance(value, NestedMapping) and value.object is self.object:
                 return key
 
         raise RuntimeError("Parent key not identified")
@@ -137,7 +133,7 @@ class NestedMKDict(ClassWrapper):
             return self._wrap(ret, parent=self)
 
         if not isinstance(ret, self._wrapper_class):
-            raise KeyError(f"Child {key!s} is not NestedMKDict")
+            raise KeyError(f"Child {key!s} is not NestedMapping")
 
         return ret
 
@@ -153,7 +149,7 @@ class NestedMKDict(ClassWrapper):
 
         if rest:
             sub = self._wrap(sub, parent=self)
-            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+            if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
                 raise TypeError(
                     f"Expect nested dictionary as value for {key}, got {type(sub).__name__}"
                 )
@@ -168,10 +164,7 @@ class NestedMKDict(ClassWrapper):
                 f"Invalid value type {type(sub)} for key ({key}). Expect non-mapping. Perhaps, one should use [{key}] or .get_any({key})..."
             )
 
-        if unwrap:
-            return sub
-
-        return self._wrap_(sub, parent=self)
+        return sub if unwrap else self._wrap_(sub, parent=self)
 
     __call__ = get_dict
 
@@ -222,10 +215,8 @@ class NestedMKDict(ClassWrapper):
         sub = self._object.get(head)
         if rest:
             sub = self._wrap(sub, parent=self)
-            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(
-                    f"Expect non-mapping as value for {key}, got {type(sub).__name__}"
-                )
+            if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
+                raise TypeError(f"Expect non-mapping as value for {key}, got {type(sub).__name__}")
 
             return sub.get(rest, default)
 
@@ -249,10 +240,8 @@ class NestedMKDict(ClassWrapper):
 
         if rest:
             sub = self._wrap(sub, parent=self)
-            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
-                raise TypeError(
-                    f"Expect non-mapping as value for {key}, got {type(sub).__name__}"
-                )
+            if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
+                raise TypeError(f"Expect non-mapping as value for {key}, got {type(sub).__name__}")
 
             try:
                 return sub.get_value(rest)
@@ -266,9 +255,7 @@ class NestedMKDict(ClassWrapper):
                 raise error from e
 
         if isinstance(sub, (ClassWrapper, self._types)):
-            raise TypeError(
-                f"Invalid value type {type(sub)} for key {key}. Expect non-mapping."
-            )
+            raise TypeError(f"Invalid value type {type(sub)} for key {key}. Expect non-mapping.")
         return sub
 
     def get_any(self, key, *, unwrap: bool = False) -> Any:
@@ -288,14 +275,11 @@ class NestedMKDict(ClassWrapper):
             return sub
 
         sub = self._wrap(sub, parent=self)
-        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+        if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
             raise TypeError(f"Nested value for {key} has wrong type")
 
         try:
-            if unwrap:
-                return sub.get_any(rest, unwrap=unwrap)
-            else:
-                return sub[rest]
+            return sub.get_any(rest, unwrap=unwrap) if unwrap else sub[rest]
         except KeyError as e:
             raise KeyError(key) from e
 
@@ -310,7 +294,7 @@ class NestedMKDict(ClassWrapper):
         if not rest:
             return self._object.pop(key)
 
-        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+        if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
             raise TypeError(f"Nested value for {key} has wrong type")
 
         ret = sub.pop(rest, delete_parents=delete_parents)
@@ -334,7 +318,7 @@ class NestedMKDict(ClassWrapper):
             raise KeyError(key)
 
         sub = self._wrap(self._object.__getitem__(key), parent=self)
-        if isinstance(sub, NestedMKDict):
+        if isinstance(sub, NestedMapping):
             sub.__delitem__(rest)
             return
 
@@ -357,7 +341,7 @@ class NestedMKDict(ClassWrapper):
             sub = self._wrap(sub, parent=self)
             # # cfg._set_parent( self )
 
-        if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+        if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
             raise TypeError(f"Nested value for {key} has wrong type")
 
         return sub.setdefault(rest, value)
@@ -376,7 +360,7 @@ class NestedMKDict(ClassWrapper):
             sub = self._wrap(sub, parent=self)
             # # cfg._set_parent( self )
 
-        if isinstance(sub, NestedMKDict):
+        if isinstance(sub, NestedMapping):
             return sub._set(rest, value)
 
         if self._not_recursive_to_others:
@@ -400,7 +384,7 @@ class NestedMKDict(ClassWrapper):
         if rest:
             sub = self._wrap(self._object.get(key), parent=self)
 
-            if self._not_recursive_to_others and not isinstance(sub, NestedMKDict):
+            if self._not_recursive_to_others and not isinstance(sub, NestedMapping):
                 raise TypeError(f"Nested value for {key} is not a nested dictionary")
 
             return rest in sub
@@ -433,12 +417,7 @@ class NestedMKDict(ClassWrapper):
             recursive_to_others=not self._not_recursive_to_others,
         )
         for k, v in self.items():
-            k = (k,)
-            if isinstance(v, self._wrapper_class):
-                new[k] = v.deepcopy()._object
-            else:
-                new[k] = v
-
+            new[(k,)] = v.deepcopy()._object if isinstance(v, self._wrapper_class) else v
         new._sep = self._sep
 
         return new
@@ -457,11 +436,7 @@ class NestedMKDict(ClassWrapper):
         v0 = self.get_any(startfromkey)
         k0 = tuple(self.iterkey(startfromkey))
 
-        if maxdepth is None:
-            nextdepth = None
-        else:
-            nextdepth = max(maxdepth - len(k0) - 1, 0)
-
+        nextdepth = None if maxdepth is None else max(maxdepth - len(k0) - 1, 0)
         if maxdepth == 0 or not isinstance(v0, self._wrapper_class):
             if appendstartkey:
                 yield k0, v0
@@ -477,9 +452,7 @@ class NestedMKDict(ClassWrapper):
             if isinstance(v, self._wrapper_class):
                 if include_dicts:
                     yield k, v
-                for k1, v1 in v.walkitems(
-                    include_dicts=include_dicts, maxdepth=nextdepth
-                ):
+                for k1, v1 in v.walkitems(include_dicts=include_dicts, maxdepth=nextdepth):
                     yield k + k1, v1
             elif not self._not_recursive_to_others and isinstance(v, Mapping):
                 if include_dicts:
@@ -504,12 +477,10 @@ class NestedMKDict(ClassWrapper):
         if yieldself:
             yield (), self
 
-    def keysmap(self) -> NestedMKDict:
+    def keysmap(self) -> NestedMapping:
         """Return a nested dictionary instance with similar structure, but
         dictionaries are replaced with tuples of their keys."""
-        return NestedMKDict.from_flatdict(
-            {k: tuple(dct.keys()) for k, dct in self.walkdicts()}
-        )
+        return NestedMapping.from_flatdict({k: tuple(dct.keys()) for k, dct in self.walkdicts()})
 
     def unique_key_parts(self) -> set[str]:
         """Return a set with all the unique set parts."""
@@ -522,9 +493,7 @@ class NestedMKDict(ClassWrapper):
         for k, _ in self.walkitems(*args, **kwargs):
             yield k
 
-    def walkjoinedkeys(
-        self, *args, sep: str | None = None, **kwargs
-    ) -> Generator[str, None, None]:
+    def walkjoinedkeys(self, *args, sep: str | None = None, **kwargs) -> Generator[str, None, None]:
         if sep is None:
             sep = self._sep
         if sep is None:
@@ -546,8 +515,8 @@ class NestedMKDict(ClassWrapper):
         for _, v in self.walkitems(*args, **kwargs):
             yield v
 
-    def visit(self, visitor, parentkey=()) -> NestedMKDictVisitor:
-        visitor = MakeNestedMKDictVisitor(visitor)
+    def visit(self, visitor, parentkey=()) -> NestedMappingVisitor:
+        visitor = MakeNestedMappingVisitor(visitor)
 
         if not parentkey:
             visitor.start(self)
@@ -557,11 +526,6 @@ class NestedMKDict(ClassWrapper):
             key = parentkey + (k,)
             if isinstance(v, self._wrapper_class):
                 v.visit(visitor, parentkey=key)
-            elif isinstance(v, FlatMKDict) and not self._not_recursive_to_others:
-                visitor.enterdict(key, v)
-                for subk, subv in v.items():
-                    visitor.visit(key + subk, subv)
-                visitor.exitdict(key, v)
             else:
                 visitor.visit(key, v)
 
@@ -585,8 +549,8 @@ class NestedMKDict(ClassWrapper):
         for k, v in other.walkitems():
             try:
                 key_already_present = k in self
-            except TypeError:
-                raise TypeError(f"Value for part({k}) is non nestable")
+            except TypeError as e:
+                raise TypeError(f"Value for part({k}) is non nestable") from e
             else:
                 if key_already_present:
                     raise TypeError(f"Key {k} already present")
@@ -596,22 +560,22 @@ class NestedMKDict(ClassWrapper):
     __ixor__ = update_missing
 
 
-def walkitems(obj: NestedMKDict | Any, *args, **kwargs):
-    if isinstance(obj, NestedMKDict):
+def walkitems(obj: NestedMapping | Any, *args, **kwargs):
+    if isinstance(obj, NestedMapping):
         yield from obj.walkitems(*args, **kwargs)
     else:
         yield (), obj
 
 
-def walkvalues(obj: NestedMKDict | Any, *args, **kwargs):
-    if isinstance(obj, NestedMKDict):
+def walkvalues(obj: NestedMapping | Any, *args, **kwargs):
+    if isinstance(obj, NestedMapping):
         yield from obj.walkvalues(*args, **kwargs)
     else:
         yield obj
 
 
-def walkkeys(obj: NestedMKDict | Any, *args, **kwargs):
-    if isinstance(obj, NestedMKDict):
+def walkkeys(obj: NestedMapping | Any, *args, **kwargs):
+    if isinstance(obj, NestedMapping):
         yield from obj.walkkeys(*args, **kwargs)
     else:
         yield ()

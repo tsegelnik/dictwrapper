@@ -1,7 +1,7 @@
-from multikeydict.nestedmkdict import NestedMKDict
+from nestedmapping import NestedMapping
 from pytest import raises
 
-def test_nestedmkdict_update_01():
+def test_nestedmapping_update_01():
     dct1 = {
         'a': 1,
         'b': 2,
@@ -52,10 +52,10 @@ def test_nestedmkdict_update_01():
                 'ia': 7
                 }
             }
-    dw1a = NestedMKDict(dct1)
-    dw2 = NestedMKDict(dct2)
-    dw3 = NestedMKDict(dct3)
-    dw4 = NestedMKDict(dct3)
+    dw1a = NestedMapping(dct1)
+    dw2 = NestedMapping(dct2)
+    dw3 = NestedMapping(dct3)
+    dw4 = NestedMapping(dct3)
 
     dw1 = dw1a.deepcopy()
     dw1.update(dw2)

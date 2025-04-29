@@ -2,10 +2,11 @@ from typing import Any
 
 
 class ClassWrapper:
-    __slots__ = ('_object', '_types', '_wrapper_class')
+    __slots__ = ("_object", "_types", "_wrapper_class")
     _object: Any
     _types: Any
     _wrapper_class: Any
+
     def __init__(self, obj, *, types=None):
         self._object = obj
         self._types = type(obj) if types is None else types
@@ -35,9 +36,9 @@ class ClassWrapper:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, ClassWrapper):
-            return self._object==other._object
+            return self._object == other._object
 
-        return self._object==other
+        return self._object == other
 
     def _wrap(self, obj, **kwargs) -> Any:
         if isinstance(obj, ClassWrapper):

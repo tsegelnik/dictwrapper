@@ -3,20 +3,20 @@ from itertools import product
 from numpy import array
 from pytest import raises
 
-from multikeydict.nestedmkdict import NestedMKDict
-from multikeydict.tools import mkmap, remap_items
-from multikeydict.tools.map import make_reorder_function
+from nestedmapping import NestedMapping
+from nestedmapping.tools import mkmap, remap_items
+from nestedmapping.tools.map import make_reorder_function
 
 
 def test_remap_items_01():
-    d_main = NestedMKDict()
-    d_reordered_match = NestedMKDict()
-    d_reordered_skipped_match = NestedMKDict()
-    d_renamed_match = NestedMKDict()
-    d_renamed_reordered_match = NestedMKDict()
-    d_renamed_reordered_skipped_source_match = NestedMKDict()
-    d_renamed_reordered_skipped_target_match = NestedMKDict()
-    d_renamed_reordered_skipped_both_match = NestedMKDict()
+    d_main = NestedMapping()
+    d_reordered_match = NestedMapping()
+    d_reordered_skipped_match = NestedMapping()
+    d_renamed_match = NestedMapping()
+    d_renamed_reordered_match = NestedMapping()
+    d_renamed_reordered_skipped_source_match = NestedMapping()
+    d_renamed_reordered_skipped_target_match = NestedMapping()
+    d_renamed_reordered_skipped_both_match = NestedMapping()
 
     rename_indices = {
         "z": ("z1", "z2"),
@@ -128,7 +128,7 @@ def test_remap_items_01():
 
 
 def test_mkmap_01():
-    m1 = NestedMKDict(
+    m1 = NestedMapping(
         {
             "a": 0,
             "b": {"c": 1},

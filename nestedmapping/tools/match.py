@@ -69,10 +69,7 @@ def match_keys(
                     key_left_proper = properkey(key_left)
                     setkey_left = OrderedSet(key_left_proper)
                     if not keys_consistent(setkey_left, setkey_right):
-                        if (
-                            collect_skipped_left_keys
-                            and key_left_proper not in processed_left_keys
-                        ):
+                        if collect_skipped_left_keys and key_left_proper not in processed_left_keys:
                             skipped_left_keys.add(key_left_proper)
                         if fcn_skip:
                             fcn_skip(i_left, key_left_proper, key_right_proper)
@@ -96,9 +93,7 @@ def match_keys(
 
     if skipped_left_keys:
         if require_all_left_keys_processed:
-            raise ValueError(
-                f"match_keys: there were unprocessed left keys {skipped_left_keys!s}"
-            )
+            raise ValueError(f"match_keys: there were unprocessed left keys {skipped_left_keys!s}")
         failure, incorrectly_skipped_key = _check_skipped_keys_incorrect(
             skipped_left_keys, skippable_left_keys_should_contain
         )
@@ -109,9 +104,7 @@ def match_keys(
             )
 
     if require_all_right_keys_processed and skipped_right_keys:
-        raise ValueError(
-            f"match_keys: there were unprocessed right keys {skipped_right_keys!s}"
-        )
+        raise ValueError(f"match_keys: there were unprocessed right keys {skipped_right_keys!s}")
 
 
 def _check_skipped_keys_incorrect(
@@ -121,8 +114,11 @@ def _check_skipped_keys_incorrect(
         return False, None
 
     setkeys = tuple(setkey(keypart) for keypart in should_contain)
-    for skipped_key in skipped_keys:
-        if not any(setkey.issubset(skipped_key) for setkey in setkeys):
-            return True, skipped_key
-
-    return False, None
+    return next(
+        (
+            (True, skipped_key)
+            for skipped_key in skipped_keys
+            if not any(setkey.issubset(skipped_key) for setkey in setkeys)
+        ),
+        (False, None),
+    )

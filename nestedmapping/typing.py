@@ -13,30 +13,17 @@ def properkey(key: KeyLike, *, sep: str | bool | None = None) -> TupleKey:
             return tuple(key.split(sep))
         elif sep is True:
             return tuple(key.split("."))
-
         return (key,)
-    if isinstance(key, tuple):
-        return key
-
-    return tuple(key)
+    return key if isinstance(key, tuple) else tuple(key)
 
 
 def orderedsetkey(key: KeyLike) -> OrderedSet[str]:
-    if isinstance(key, str):
-        return OrderedSet((key,))
-
-    return OrderedSet(key)
+    return OrderedSet((key,)) if isinstance(key, str) else OrderedSet(key)
 
 
 def setkey(key: KeyLike) -> set[str]:
-    if isinstance(key, str):
-        return set((key,))
-
-    return set(key)
+    return {key} if isinstance(key, str) else set(key)
 
 
 def strkey(key: KeyLike, *, sep=".") -> str:
-    if isinstance(key, str):
-        return key
-
-    return sep.join(key)
+    return key if isinstance(key, str) else sep.join(key)

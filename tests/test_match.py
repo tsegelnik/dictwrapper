@@ -2,7 +2,7 @@ from itertools import product
 
 from pytest import raises
 
-from multikeydict.tools import match_keys
+from nestedmapping.tools import match_keys
 
 
 def test_match():
