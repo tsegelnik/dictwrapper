@@ -12,7 +12,7 @@ maintainers = [
     {name = "Vitalii Zavadskyi", email= "zavadskiy.vs@phystech.edu"},
     {name = "Tsegelnik Nikita", email = "tsegelnik@jinr.ru"},
 ]
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["numpy", "ordered-set"]
