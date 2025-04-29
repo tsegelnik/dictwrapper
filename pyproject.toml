@@ -2,19 +2,20 @@
 name = "nestedmapping"
 version = "0.9.0"
 description = "The package to work with nested dictionaries supporing list/set as keys"
+# TODO: заменить на организацию
 authors = [
-    {name = "Gonchar Maxim", email = "gonchar@jinr.ru"},
-    {name = "Vitalii Zavadskyi", email= "zavadskiy.vs@phystech.edu"},
-    {name = "Tsegelnik Nikita", email = "tsegelnik@jinr.ru"},
+  { name = "Gonchar Maxim", email = "gonchar@jinr.ru" },
+  { name = "Vitalii Zavadskyi", email = "zavadskiy.vs@phystech.edu" },
+  { name = "Tsegelnik Nikita", email = "tsegelnik@jinr.ru" },
 ]
 maintainers = [
-    {name = "Gonchar Maxim", email = "gonchar@jinr.ru"},
-    {name = "Vitalii Zavadskyi", email= "zavadskiy.vs@phystech.edu"},
-    {name = "Tsegelnik Nikita", email = "tsegelnik@jinr.ru"},
+  { name = "Gonchar Maxim", email = "gonchar@jinr.ru" },
+  { name = "Vitalii Zavadskyi", email = "zavadskiy.vs@phystech.edu" },
+  { name = "Tsegelnik Nikita", email = "tsegelnik@jinr.ru" },
 ]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = ["numpy", "ordered-set"]
 
 [project.urls]
@@ -24,11 +25,12 @@ documentation = "https://github.com/dagflow-team/nestedmapping/wiki"
 "Bug Tracker" = "https://github.com/dagflow-team/nestedmapping/issues"
 
 [project.optional-dependencies]
-dev = [ "pytest", "pytest-cov", "coverage"]
+dev = ["pytest", "pytest-cov", "coverage"]
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "wheel", "packaging"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["nestedmapping"]
+where = ["src"]
+#exclude = ["tests*", "docs*"]  # Исключает целые папки при необходимости
